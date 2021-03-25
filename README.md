@@ -1,2 +1,2 @@
-# Blackjack
-Blackjack with MIPS
+# Go Fish
+Go Fish with MIPS
