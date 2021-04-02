@@ -9,13 +9,12 @@ int dealCards (int hands[4][13], int numberOfPlayer, int cardPerHand, int* deck)
 
 int main(void) {
   int *deck;
-  int i;
   int shuffleNumber;
   int deckTop = 0;
   int numberOfPlayers;
   int players[4];
   int playerHands[4][13] = {{0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0}};
-  int fourPair = 0;
+  int boolFourPair = 0;
   printf("Enter an integer between 50 - 1000: ");
   scanf("%d", &shuffleNumber);  
   deck = createDeck();
@@ -33,10 +32,8 @@ int* createDeck() {
 
 static int d[52];
 int type[13] = {1,2,3,4,5,6,7,8,9,10,11,12,13};
-int i;
-int j;
-  for(i  = 0; i < 4; i++ ) {
-    for (j = 0; j < 13; j++) {
+  for(int i = 0; i < 4; i++ ) {
+    for (int j = 0; j < 13; j++) {
       d[j + i*13] = type[j % 52];
     }
   }
