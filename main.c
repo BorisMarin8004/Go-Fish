@@ -5,8 +5,9 @@
 int* createDeck(); 
 int * shuffleDeck(int* deck, int shuffleNumber);
 void swap (int *a, int*b);
-int dealCards (int hands[4][13], int numberOfPlayer, int cardPerHand, int* deck);
+void dealCards (int hands[4][13], int numberOfPlayer, int cardPerHand, int* deck, int *top);
 void printOptions( int hands[4][13], int player);
+int draw (int*deck, int* deckTop);
 
 int main(void) {
     int *deck;
@@ -24,7 +25,7 @@ int main(void) {
     printf("Enter an integer between 2-4: ");
     scanf("%d", &numberOfPlayers);
 
-    deckTop = dealCards(playerHands, numberOfPlayers, 5,  deck);
+    dealCards(playerHands, numberOfPlayers, 5,  deck, &deckTop);
 
     //print Options Test
     printOptions(playerHands, 2);
@@ -50,12 +51,12 @@ int * shuffleDeck(int* deck, int shuffleNumber) {
         int j = shuffleNumber % (i+1);
         swap(&deck[i], &deck[j]);
     }
-    //Prints deck, for DEBUG Erase in FINAL
-    // for(int i = 0; i < 52; i++) {
-    //     printf("*(deck + [%d]) : %d\n", i, *(deck + i) );
-    // }
-    return deck;
-}
+//     //Prints deck, for DEBUG Erase in FINAL
+//     for(int i = 0; i < 52; i++) {
+//         printf("*(deck + [%d]) : %d\n", i, *(deck + i) );
+//     }
+//     return deck;
+// }
 
 
 
@@ -66,28 +67,25 @@ void swap (int *a, int*b){
 }
   
 
-int dealCards (int hands[4][13], int numberOfPlayers, int cardPerHand, int* deck) {
-
-    int top = 0;
-
-    for(int i = 0; i < cardPerHand; i++){
+void dealCards (int hands[4][13], int numberOfPlayers, int cardPerHand, int* deck, int *deckTop) {
+   for(int i = 0; i < cardPerHand; i++){
         for(int j = 0; j < numberOfPlayers; j++){
-            int card = deck[top];
+            int card = draw(deck, deckTop);
             hands[j][card]++;
-            top++;
+    
         }
     }
 
-//Prints players hands. FOR DEBUG, Erase in FINAL
-    // for(int i = 0; i < numberOfPlayers; i++){
-    //     printf("*Player %d hand\n",i+1);
-    //     for(int j = 0; j < 13; j++){
-    //         if(hands[i][j] != 0) {
-    //             printf("You have %d, %d's\n", hands[i][j], j);
-    //         }
-    //     }
-    // }
-    return 0;
+// //Prints players hands. FOR DEBUG, Erase in FINAL
+//     for(int i = 0; i < numberOfPlayers; i++){
+//         printf("*Player %d hand\n",i+1);
+//         for(int j = 0; j < 13; j++){
+//             if(hands[i][j] != 0) {
+//                 printf("You have %d, %d's\n", hands[i][j], j);
+//             }
+//         }
+//     }
+
 }
 
 
@@ -101,7 +99,14 @@ void printOptions( int hands[4][13], int player)
       }
             
     }
-  printf("Which Player would you like to ask for which card in your hand? (Player Number, Card Number)");
+  printf("Which Player would you like to ask for which card in your hand? (Player Number, Card Number): \n");
 
+
+}
+
+int draw (int*deck, int* deckTop) {
+   int card = deck[*deckTop];
+   *deckTop = *deckTop + 1;
+   return card;
 
 }
