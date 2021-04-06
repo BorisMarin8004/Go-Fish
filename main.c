@@ -1,11 +1,15 @@
 #include <stdio.h>
 
 //for later https://stackoverflow.com/questions/54962681/2d-array-c-to-mips
+const int DECK_SIZE = 52;
 
 int* createDeck(); 
 int * shuffleDeck(int* deck, int shuffleNumber);
 void swap (int *a, int*b);
-int dealCards (int hands[4][13], int numberOfPlayer, int cardPerHand, int* deck);
+int dealCards (int hands[4][13], int numberOfPlayer, int cardPerHand, const int* deck);
+int goFish (int player, int hands[4][13], int* deck, int expCard, int * deckTop);
+void moveCards(int srcPlayer, int targetPlayer, int card);
+void turn(int targetPlayer, int card);
 
 int main(void) {
     int *deck;
@@ -30,14 +34,14 @@ int main(void) {
 //'A','2','3','4','5','6','7','8','9','','J','Q','K'};
 int* createDeck() {
 
-static int d[52];
-int type[13] = {1,2,3,4,5,6,7,8,9,10,11,12,13};
-  for(int i = 0; i < 4; i++ ) {
-    for (int j = 0; j < 13; j++) {
-      d[j + i*13] = type[j % 52];
+    static int d[52];
+    int type[13] = {1,2,3,4,5,6,7,8,9,10,11,12,13};
+    for(int i = 0; i < 4; i++ ) {
+        for (int j = 0; j < 13; j++) {
+            d[j + i*13] = type[j % 52];
+        }
     }
-  }
-  return d;
+    return d;
 }
 
 //random from https://www.geeksforgeeks.org/shuffle-a-given-array-using-fisher-yates-shuffle-algorithm/
@@ -54,14 +58,14 @@ int * shuffleDeck(int* deck, int shuffleNumber) {
 
 
 
-void swap (int *a, int*b){
+void swap (int *a, int *b){
     int temp = *a;
     *a = *b;
     *b = temp;
 }
   
 
-int dealCards (int hands[4][13], int numberOfPlayers, int cardPerHand, int* deck) {
+int dealCards (int hands[4][13], int numberOfPlayers, int cardPerHand, const int* deck) {
 
     int top = 0;
 
@@ -81,5 +85,22 @@ int dealCards (int hands[4][13], int numberOfPlayers, int cardPerHand, int* deck
             }
         }
     }
+    return top;
+}
+
+int goFish (int player, int hands[4][13], int* deck, int expCard, int * deckTop){
+    if (expCard == draw(deck, deckTop)){
+        hands[player][expCard]++;
+        return 1;
+    }
     return 0;
 }
+
+void moveCards(int srcPlayer, int targetPlayer, int card){
+
+}
+
+void turn(int targetPlayer, int card){
+
+}
+
