@@ -1,59 +1,87 @@
 #include <stdio.h>
-
+#include <stdlib.h>
 //for later https://stackoverflow.com/questions/54962681/2d-array-c-to-mips
 const int DECK_SIZE = 52;
+int hands[4][13] = {{0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0}};
+int deckTop = 0;
+int deck[52];
 
-int* createDeck();
-int * shuffleDeck(int* deck, int shuffleNumber);
+
+// ALL PLAYERS *****MUST***** BE REFERENCED AS INDEXES OF HANDS ARRAY
+
+void createDeck();
+void shuffleDeck(int shuffleNumber);
 void swap (int *a, int*b);
-int dealCards (int hands[4][13], int numberOfPlayer, int cardPerHand, const int* deck);
-int goFish (int player, int hands[4][13], int* deck, int expCard, int * deckTop);
+void dealCards (int numberOfPlayer, int cardPerHand);
+int goFish (int player, int expCard);
 void moveCards(int srcPlayer, int targetPlayer, int card);
-void turn(int targetPlayer, int card);
+void turn(int targetPlayer);
+void printOptions(int player);
+int draw();
+
+
+//Tests
+void testHands();
+
 
 int main(void) {
-    int *deck;
+
     int shuffleNumber;
-    int deckTop = 0;
+
     int numberOfPlayers;
     int players[4];
-    int playerHands[4][13] = {{0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0}};
     int boolFourPair = 0;
-    printf("Enter an integer between 50 - 1000: ");
+    printf("Enter an integer between 50 - 1000(seed): ");
     scanf("%d", &shuffleNumber);
-    deck = createDeck();
-    deck = shuffleDeck(deck,shuffleNumber);
+    createDeck();
+    shuffleDeck(shuffleNumber);
 
-    printf("Enter an integer between 2-4: ");
+    printf("Enter number of players between 2-4: ");
     scanf("%d", &numberOfPlayers);
 
-    deckTop = dealCards(playerHands, numberOfPlayers, 5,  deck);
-
+    dealCards(numberOfPlayers, 5);
+    testHands();
+    //print Options Test
+    printOptions(1);
+    moveCards(1, 0, 3);
+    testHands();
+    goFish(1, 10);
+    testHands();
     return 0;
 }
-//'A','2','3','4','5','6','7','8','9','','J','Q','K'};
-int* createDeck() {
 
-    static int d[52];
+void testHands(){
+    printf("----ALL HANDS----\n");
+    for (int i = 0; i < 4; i++){
+        printf("*Player %d hand\n",i+1);
+        for (int j = 0; j < 13; j++){
+            if(hands[i][j] != 0) {
+                printf("You have %d, %d's\n", hands[i][j], j);
+            }
+        }
+    }
+}
+
+//'A','2','3','4','5','6','7','8','9','','J','Q','K'};
+void createDeck() {
     int type[13] = {1,2,3,4,5,6,7,8,9,10,11,12,13};
     for(int i = 0; i < 4; i++ ) {
         for (int j = 0; j < 13; j++) {
-            d[j + i*13] = type[j % 52];
+            deck[j + i*13] = type[j % 52];
         }
     }
-    return d;
 }
 
 //random from https://www.geeksforgeeks.org/shuffle-a-given-array-using-fisher-yates-shuffle-algorithm/
-int * shuffleDeck(int* deck, int shuffleNumber) {
+void shuffleDeck(int shuffleNumber) {
     for (int i = 52-1; i > 0; i--){
         int j = shuffleNumber % (i+1);
+//        int j = (rand() % ((shuffleNumber+5) - shuffleNumber + 1)) + shuffleNumber;
         swap(&deck[i], &deck[j]);
     }
     for(int i = 0; i < 52; i++) {
         printf("*(deck + [%d]) : %d\n", i, *(deck + i) );
     }
-    return deck;
 }
 
 
@@ -65,41 +93,59 @@ void swap (int *a, int *b){
 }
 
 
-int dealCards (int hands[4][13], int numberOfPlayers, int cardPerHand, const int* deck) {
-
-    int top = 0;
-
+void dealCards (int numberOfPlayers, int cardPerHand) {
     for(int i = 0; i < cardPerHand; i++){
         for(int j = 0; j < numberOfPlayers; j++){
-            int card = deck[top];
+            int card = draw(deck, deckTop);
             hands[j][card]++;
-            top++;
         }
     }
-
-    for(int i = 0; i < numberOfPlayers; i++){
-        printf("*Player %d hand\n",i+1);
-        for(int j = 0; j < 13; j++){
-            if(hands[i][j] != 0) {
-                printf("You have %d, %d's\n", hands[i][j], j);
-            }
-        }
-    }
-    return top;
 }
 
-int goFish (int player, int hands[4][13], int* deck, int expCard, int * deckTop){
-    if (expCard == draw(deck, deckTop)){
-        hands[player][expCard]++;
-        return 1;
+void printOptions(int player){
+    printf("*Player %d hand\n",player+1);
+    for (int j = 0; j < 13; j++){
+        if(hands[player][j] != 0) {
+            printf("You have %d, %d's\n", hands[player][j], j);
+        }
+
     }
-    return 0;
+    printf("Which Player would you like to ask for which card in your hand? (Player Number, Card Number): \n");
+}
+
+int goFish (int player, int expCard){
+    int card = draw(deck, deckTop);
+    hands[player][card]++;
+    return expCard == card;
 }
 
 void moveCards(int srcPlayer, int targetPlayer, int card){
-
+    hands[srcPlayer][card]--;
+    hands[targetPlayer][card]++;
 }
 
-void turn(int targetPlayer, int card){
+//void turn(int targetPlayer){
+//    printOptions(targetPlayer);
+//    int playerToAsk;
+//    int cardToAsk;
+//    scanf("%d", &playerToAsk);
+//    scanf("%d", &cardToAsk);
+//    if (cardInHand(playerToAsk, cardToAsk)){
+//        moveCards(playerToAsk, targetPlayer, cardToAsk);
+//    } else {
+//        while(1){
+//            int fishedSuccessful = goFish(targetPlayer, cardToAsk);
+//            if (fishedSuccessful){
+//                turn(targetPlayer);
+//            } else {
+//                return;
+//            }
+//        }
+//    }
+//}
 
+int draw () {
+    int card = deck[deckTop];
+    deckTop = deckTop + 1;
+    return card;
 }
