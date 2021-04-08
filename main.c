@@ -3,7 +3,7 @@
 //for later https://stackoverflow.com/questions/54962681/2d-array-c-to-mips
 const int DECK_SIZE = 52;
 
-int* createDeck(); 
+int* createDeck();
 int * shuffleDeck(int* deck, int shuffleNumber);
 void swap (int *a, int*b);
 int dealCards (int hands[4][13], int numberOfPlayer, int cardPerHand, const int* deck);
@@ -63,7 +63,7 @@ void swap (int *a, int *b){
     *a = *b;
     *b = temp;
 }
-  
+
 
 int dealCards (int hands[4][13], int numberOfPlayers, int cardPerHand, const int* deck) {
 
@@ -103,4 +103,3 @@ void moveCards(int srcPlayer, int targetPlayer, int card){
 void turn(int targetPlayer, int card){
 
 }
-
