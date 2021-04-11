@@ -5,6 +5,7 @@ const int DECK_SIZE = 52;
 int hands[4][13] = {{0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0}};
 int deckTop = 0;
 int deck[52];
+int pairLimit = 4;
 
 
 // ALL PLAYERS *****MUST***** BE REFERENCED AS INDEXES OF HANDS ARRAY
@@ -44,7 +45,7 @@ int main(void) {
     testHands();
     //print Options Test
     printOptions(1);
-    moveCards(1, 0, 3);
+    moveCards(1, 0, 2);
     testHands();
     goFish(1, 10);
     testHands();
@@ -70,7 +71,7 @@ void testHands(){
 
 //'A','2','3','4','5','6','7','8','9','','J','Q','K'};
 void createDeck() {
-    int type[13] = {1,2,3,4,5,6,7,8,9,10,11,12,13};
+    int type[13] = {0,1,2,3,4,5,6,7,8,9,10,11,12};
     for(int i = 0; i < 4; i++ ) {
         for (int j = 0; j < 13; j++) {
             deck[j + i*13] = type[j % 52];
@@ -111,7 +112,7 @@ void dealCards (int numberOfPlayers, int cardPerHand) {
 void printOptions(int player){
     printf("*Player %d hand\n",player+1);
     for (int j = 0; j < 13; j++){
-        if(hands[player][j] != 0 && hands[player][j] != 4) { // change hard coded 4
+        if(hands[player][j] != 0 && hands[player][j] != pairLimit) { // change hard coded 4
             printf("You have %d, %d's\n", hands[player][j], j);
         }
 
