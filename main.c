@@ -16,6 +16,7 @@ void dealCards (int numberOfPlayer, int cardPerHand);
 int goFish (int player, int expCard);
 void moveCards(int srcPlayer, int targetPlayer, int card);
 void turn(int targetPlayer);
+int cardInHand(int targetPlayer, int card);
 void printOptions(int player);
 int draw();
 
@@ -46,6 +47,11 @@ int main(void) {
     moveCards(1, 0, 3);
     testHands();
     goFish(1, 10);
+    testHands();
+    printf("Card in hand: %d\n", cardInHand(1, 9));
+
+
+    turn(0);
     testHands();
     return 0;
 }
@@ -105,7 +111,7 @@ void dealCards (int numberOfPlayers, int cardPerHand) {
 void printOptions(int player){
     printf("*Player %d hand\n",player+1);
     for (int j = 0; j < 13; j++){
-        if(hands[player][j] != 0) {
+        if(hands[player][j] != 0 && hands[player][j] != 4) { // change hard coded 4
             printf("You have %d, %d's\n", hands[player][j], j);
         }
 
@@ -124,25 +130,34 @@ void moveCards(int srcPlayer, int targetPlayer, int card){
     hands[targetPlayer][card]++;
 }
 
-//void turn(int targetPlayer){
-//    printOptions(targetPlayer);
-//    int playerToAsk;
-//    int cardToAsk;
-//    scanf("%d", &playerToAsk);
-//    scanf("%d", &cardToAsk);
-//    if (cardInHand(playerToAsk, cardToAsk)){
-//        moveCards(playerToAsk, targetPlayer, cardToAsk);
-//    } else {
-//        while(1){
-//            int fishedSuccessful = goFish(targetPlayer, cardToAsk);
-//            if (fishedSuccessful){
-//                turn(targetPlayer);
-//            } else {
-//                return;
-//            }
-//        }
-//    }
-//}
+int cardInHand(int targetPlayer, int card){
+    if(hands[targetPlayer][card] > 0){
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+void turn(int targetPlayer){
+    printOptions(targetPlayer);
+    int playerToAsk;
+    int cardToAsk;
+    scanf("%d", &playerToAsk);
+    scanf("%d", &cardToAsk);
+    if (cardInHand(playerToAsk, cardToAsk)){
+        moveCards(playerToAsk, targetPlayer, cardToAsk);
+        turn(targetPlayer);
+    } else {
+        while(1){
+            int fishedSuccessful = goFish(targetPlayer, cardToAsk);
+            if (fishedSuccessful){
+                turn(targetPlayer);
+            } else {
+                return;
+            }
+        }
+    }
+}
 
 int draw () {
     int card = deck[deckTop];
