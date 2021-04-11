@@ -149,13 +149,10 @@ void turn(int targetPlayer){
         moveCards(playerToAsk, targetPlayer, cardToAsk);
         turn(targetPlayer);
     } else {
-        while(1){
-            int fishedSuccessful = goFish(targetPlayer, cardToAsk);
-            if (fishedSuccessful){
-                turn(targetPlayer);
-            } else {
-                return;
-            }
+        if (goFish(targetPlayer, cardToAsk)){
+            turn(targetPlayer);
+        } else {
+            return;
         }
     }
 }
