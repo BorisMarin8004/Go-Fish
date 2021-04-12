@@ -6,10 +6,11 @@ int hands[4][13] = {{0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0
 int deckTop = 0;
 int deck[52];
 int pairLimit = 4;
+int numberOfPlayers = 0; 
 
 
 // ALL PLAYERS *****MUST***** BE REFERENCED AS INDEXES OF HANDS ARRAY
-
+void startGame();
 void createDeck();
 void shuffleDeck(int shuffleNumber);
 void swap (int *a, int*b);
@@ -21,6 +22,10 @@ int cardInHand(int targetPlayer, int card);
 void printOptions(int player);
 int draw();
 
+int isFinished();
+void endGame();
+void printScores();
+
 
 //Tests
 void testHands();
@@ -28,11 +33,43 @@ void testHands();
 
 int main(void) {
 
+    // int shuffleNumber;
+
+    // int numberOfPlayers;
+    // int players[4];
+    // int boolFourPair = 0;
+    // printf("Enter an integer between 50 - 1000(seed): ");
+    // scanf("%d", &shuffleNumber);
+    // createDeck();
+    // shuffleDeck(shuffleNumber);
+
+    // printf("Enter number of players between 2-4: ");
+    // scanf("%d", &numberOfPlayers);
+
+    // dealCards(numberOfPlayers, 5);
+    // testHands();
+    // //print Options Test
+    // printOptions(1);
+    // moveCards(1, 0, 2);
+    // testHands();
+    // goFish(1, 10);
+    // testHands();
+    // printf("Card in hand: %d\n", cardInHand(1, 9));
+
+
+    // turn(0);
+    // testHands();
+    startGame();
+    return 0;
+}
+
+void startGame() {
     int shuffleNumber;
 
     int numberOfPlayers;
     int players[4];
     int boolFourPair = 0;
+    int turnOrder = 0;
     printf("Enter an integer between 50 - 1000(seed): ");
     scanf("%d", &shuffleNumber);
     createDeck();
@@ -42,19 +79,20 @@ int main(void) {
     scanf("%d", &numberOfPlayers);
 
     dealCards(numberOfPlayers, 5);
-    testHands();
-    //print Options Test
-    printOptions(1);
-    moveCards(1, 0, 2);
-    testHands();
-    goFish(1, 10);
-    testHands();
-    printf("Card in hand: %d\n", cardInHand(1, 9));
+    if(!isFinished()) {
+    while(turnOrder != numberOfPlayers){
+        if(turnOrder == numberOfPlayers){
+            turnOrder = 0;
+        }
+        printf("\nPlayer %d's turn!\n", turnOrder+1);
+        turn(turnOrder);
 
+        turnOrder++;
+        }
+    }
+    endGame();
 
-    turn(0);
-    testHands();
-    return 0;
+    //printf("ENDGAME\n");
 }
 
 void testHands(){
@@ -175,4 +213,45 @@ int draw () {
     int card = deck[deckTop];
     deckTop = deckTop + 1;
     return card;
+}
+
+void endGame() {
+
+    printScores();
+    int answer = 0;
+    printf("Would you like to play again?(1 for yes, 0 for no): \n");
+    scanf("%d", &answer);
+    if (answer == 1) {
+        startGame();
+    }
+}
+
+int isFinished() { //changed from void
+    int countBooks = 0;
+    for (int i = 0; i < numberOfPlayers; i++) {
+        for (int j = 0; j < 13; j++) {
+            if (hands[i][j] == 4)
+            countBooks++;
+        }
+    }
+    if (countBooks == 13) {
+        printScores();
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+void printScores(){
+    printf("----ALL HANDS----\n");
+    for (int i = 0; i < numberOfPlayers; i++){ 
+        printf("*Player %d hand\n",i+1);
+        for (int j = 0; j < 13; j++){
+            //score is defined as count of 4
+            if (hands[i][j] == 4) {
+                printf("    %d: %d's\n", hands[i][j], j+1); 
+            }
+        }
+    }
 }
