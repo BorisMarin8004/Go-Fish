@@ -4,8 +4,8 @@
 const int DECK_SIZE = 52;
 int hands[4][13] = {{0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0}};
 int deckTop = 0;
-int deck[52];
-int pairLimit = 4;
+int deck[DECK_SIZE];
+int pairLimit = 2;
 int numberOfPlayers = 0; 
 
 
@@ -14,7 +14,7 @@ void startGame();
 void createDeck();
 void shuffleDeck(int shuffleNumber);
 void swap (int *a, int*b);
-void dealCards (int numberOfPlayer, int cardPerHand);
+void dealCards (int cardPerHand);
 int goFish (int player, int expCard);
 void moveCards(int srcPlayer, int targetPlayer, int card);
 void turn(int targetPlayer);
@@ -65,11 +65,10 @@ int main(void) {
 
 void startGame() {
     int shuffleNumber;
-
-    int numberOfPlayers;
-    int players[4];
-    int boolFourPair = 0;
     int turnOrder = 0;
+    printf("Enter how many pair you want to play: ");
+    scanf("%d", &pairLimit);
+
     printf("Enter an integer between 50 - 1000(seed): ");
     scanf("%d", &shuffleNumber);
     createDeck();
@@ -77,22 +76,22 @@ void startGame() {
 
     printf("Enter number of players between 2-4: ");
     scanf("%d", &numberOfPlayers);
+    int players[numberOfPlayers];
 
-    dealCards(numberOfPlayers, 5);
-    if(!isFinished()) {
-    while(turnOrder != numberOfPlayers){
-        if(turnOrder == numberOfPlayers){
-            turnOrder = 0;
+    dealCards(5);
+    while(!isFinished()) {
+        while(turnOrder != numberOfPlayers){
+            printf("\nPlayer %d's turn!\n", turnOrder+1);
+            turn(turnOrder);
+            if (isFinished()){
+                endGame();
+                return;
+            }
+            turnOrder++;
         }
-        printf("\nPlayer %d's turn!\n", turnOrder+1);
-        turn(turnOrder);
-
-        turnOrder++;
-        }
+        turnOrder = 0;
     }
     endGame();
-
-    //printf("ENDGAME\n");
 }
 
 void testHands(){
@@ -113,19 +112,19 @@ void createDeck() {
     int type[13] = {0,1,2,3,4,5,6,7,8,9,10,11,12};
     for(int i = 0; i < 4; i++ ) {
         for (int j = 0; j < 13; j++) {
-            deck[j + i*13] = type[j % 52];
+            deck[j + i*13] = type[j % DECK_SIZE];
         }
     }
 }
 
 //random from https://www.geeksforgeeks.org/shuffle-a-given-array-using-fisher-yates-shuffle-algorithm/
 void shuffleDeck(int shuffleNumber) {
-    for (int i = 52-1; i > 0; i--){
+    for (int i = DECK_SIZE-1; i > 0; i--){
         int j = shuffleNumber % (i+1);
 //        int j = (rand() % ((shuffleNumber+5) - shuffleNumber + 1)) + shuffleNumber;
         swap(&deck[i], &deck[j]);
     }
-    for(int i = 0; i < 52; i++) {
+    for(int i = 0; i < DECK_SIZE; i++) {
         printf("*(deck + [%d]) : %d\n", i, *(deck + i) );
     }
 }
@@ -139,7 +138,7 @@ void swap (int *a, int *b){
 }
 
 //Distributes integers, e.g. cards to each player from deck (numberOfPlayers - how many players there are)
-void dealCards (int numberOfPlayers, int cardPerHand) {
+void dealCards (int cardPerHand) {
     for(int i = 0; i < cardPerHand; i++){
         for(int j = 0; j < numberOfPlayers; j++){
             int card = draw(deck, deckTop);
@@ -153,9 +152,11 @@ void printOptions(int player){
     printf("*Player %d hand\n",player+1);
     int hasCardInHand = 0;
     for (int j = 0; j < 13; j++){
-        if(hands[player][j] != 0 && hands[player][j] != pairLimit) { // change hard coded 4
-            printf("You have %d, %d's\n", hands[player][j], j);
-            hasCardInHand = 1;
+        if(hands[player][j] != 0 && hands[player][j] != 4) {
+            if (pairLimit == 4 || (hands[player][j] != 2 && pairLimit == 2)){
+                printf("You have %d, %d's\n", hands[player][j], j);
+                hasCardInHand = 1;
+            }
         }
     }
     if (!hasCardInHand){
@@ -166,13 +167,16 @@ void printOptions(int player){
 
 //Calls draw() to take card from deck and adds it to player's hand
 int goFish (int player, int expCard){
+    printf("You are fishing(email) now. (Bad hacker stuff)\n");
     int card = draw(deck, deckTop);
     hands[player][card]++;
+    printf("You got: %d\n", card);
     return expCard == card;
 }
 
 //Decrease cards from one hand to increases to current player
 void moveCards(int srcPlayer, int targetPlayer, int card){
+    printf("You got the card you asked for, in your nasty hands!\n");
     while(cardInHand(srcPlayer, card)) {
         hands[srcPlayer][card]--;
         hands[targetPlayer][card]++;
@@ -196,15 +200,27 @@ void turn(int targetPlayer){
     int cardToAsk;
     scanf("%d", &playerToAsk);
     scanf("%d", &cardToAsk);
-    if (cardInHand(playerToAsk, cardToAsk)){
-        moveCards(playerToAsk, targetPlayer, cardToAsk);
-        turn(targetPlayer);
-    } else {
-        if (goFish(targetPlayer, cardToAsk)){
+    playerToAsk--;
+    if (targetPlayer != playerToAsk){
+        if (cardInHand(playerToAsk, cardToAsk)){
+            moveCards(playerToAsk, targetPlayer, cardToAsk);
+            if (isFinished()){
+                endGame();
+            }
             turn(targetPlayer);
         } else {
-            return;
+            if (goFish(targetPlayer, cardToAsk)){
+                if (isFinished()){
+                    endGame();
+                }
+                turn(targetPlayer);
+            } else {
+                return;
+            }
         }
+    } else {
+        printf("Sorry, cannot yourself ya'\n");
+        turn(targetPlayer);
     }
 }
 
@@ -216,41 +232,47 @@ int draw () {
 }
 
 void endGame() {
-
     printScores();
     int answer = 0;
     printf("Would you like to play again?(1 for yes, 0 for no): \n");
     scanf("%d", &answer);
     if (answer == 1) {
+        for (int i = 0; i < numberOfPlayers; i++){
+            for (int k = 0; k < 13; k++){
+                hands[i][k] = 0;
+            }
+        }
+        deckTop = 0;
+        pairLimit = 2;
+        numberOfPlayers = 0;
         startGame();
     }
+    printf("ENDGAME\n");
 }
 
 int isFinished() { //changed from void
     int countBooks = 0;
     for (int i = 0; i < numberOfPlayers; i++) {
         for (int j = 0; j < 13; j++) {
-            if (hands[i][j] == 4)
-            countBooks++;
+            if (hands[i][j] == pairLimit) {
+                countBooks++;
+            }
         }
     }
-    if (countBooks == 13) {
-        printScores();
+    if (countBooks == 1) {
         return 1;
-    }
-    else {
+    } else {
         return 0;
     }
 }
 
 void printScores(){
-    printf("----ALL HANDS----\n");
+    printf("----Printing Scores----\n");
     for (int i = 0; i < numberOfPlayers; i++){ 
         printf("*Player %d hand\n",i+1);
         for (int j = 0; j < 13; j++){
-            //score is defined as count of 4
-            if (hands[i][j] == 4) {
-                printf("    %d: %d's\n", hands[i][j], j+1); 
+            if (hands[i][j] == pairLimit) {
+                printf("    %d: %d's\n", hands[i][j], j);
             }
         }
     }
