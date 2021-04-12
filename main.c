@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
 //for later https://stackoverflow.com/questions/54962681/2d-array-c-to-mips
 const int DECK_SIZE = 52;
 int hands[4][13] = {{0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0}};
@@ -32,37 +31,12 @@ void testHands();
 
 
 int main(void) {
-
-    // int shuffleNumber;
-
-    // int numberOfPlayers;
-    // int players[4];
-    // int boolFourPair = 0;
-    // printf("Enter an integer between 50 - 1000(seed): ");
-    // scanf("%d", &shuffleNumber);
-    // createDeck();
-    // shuffleDeck(shuffleNumber);
-
-    // printf("Enter number of players between 2-4: ");
-    // scanf("%d", &numberOfPlayers);
-
-    // dealCards(numberOfPlayers, 5);
-    // testHands();
-    // //print Options Test
-    // printOptions(1);
-    // moveCards(1, 0, 2);
-    // testHands();
-    // goFish(1, 10);
-    // testHands();
-    // printf("Card in hand: %d\n", cardInHand(1, 9));
-
-
-    // turn(0);
-    // testHands();
     startGame();
     return 0;
 }
 
+//Starts the game by calling createDeck(), shuffleDeck() and dealCards(). Then controls
+//the turn order, calling turn() while the game is not finished.
 void startGame() {
     int shuffleNumber;
     int turnOrder = 0;
@@ -231,6 +205,7 @@ int draw () {
     return card;
 }
 
+//Prints scores and resets game if user so desires(answers yes).
 void endGame() {
     printScores();
     int answer = 0;
@@ -250,7 +225,8 @@ void endGame() {
     printf("ENDGAME\n");
 }
 
-int isFinished() { //changed from void
+//Checks if all matches have been made
+int isFinished() {
     int countBooks = 0;
     for (int i = 0; i < numberOfPlayers; i++) {
         for (int j = 0; j < 13; j++) {
@@ -266,6 +242,7 @@ int isFinished() { //changed from void
     }
 }
 
+//Prints each set made by players
 void printScores(){
     printf("----Printing Scores----\n");
     for (int i = 0; i < numberOfPlayers; i++){ 
