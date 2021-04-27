@@ -29,15 +29,71 @@
 	
 .text
 	main:
+<<<<<<< Updated upstream
 	la $s0, deck #loading in deck
 	la $s1, DECKSIZE #loading deck SIZE
 	move $a0, $s0
 	move $a1, $s1
 	
 	#jal createDeck
+=======
+		la $s0, deck #loading in deck
+		la $s1, DECKSIZE #loading deck SIZE
+		move $a0, $s0
+		move $a1, $s1
+		
+		jal createDeck
+		move $s0,$s1
+		
+		li $t0, 3
+		li $t1, 4
+		
+		move $a0, $t0
+		jal printInt
+		move $a0, $t1
+		jal printInt
+		
+		move $a0, $t0
+		move $a1, $t1
+		jal swap
+		move $t0, $v0
+		move $t1, $v1
+		
+		la $a0, space
+		jal printStr
+		
+		move $a0, $t0
+		jal printInt
+		move $a0, $t1
+		jal printInt
+>>>>>>> Stashed changes
 	
 	
 	
+<<<<<<< Updated upstream
+=======
+	swap:
+		move $v0, $a1
+		move $v1, $a0
+	jr $ra
+	createDeck: #void createDeck() {
+		li $t1, 52 #deck size
+    		li $t2, 13 # 13
+    		li $t4, 0 # counter for j int j = 0
+    		whileDeck: 
+    			div $t4, $t2 #j % 13;
+    			mfhi $t5	
+    			#   while (j < 52)  {	
+    			sw $t5, 0($a0)  #  deck[j] = j % 13;
+    		
+    			addi $a0, $a0, 4 # moves deck index
+   			addi $t4,$t4,1  #j++
+   		
+    			blt $t4,$t1, whileDeck # while (j < 52)
+     		
+     	jr $ra
+
+>>>>>>> Stashed changes
 	#End of Program
 	exit:
 	li $v0, 10
