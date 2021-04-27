@@ -29,34 +29,34 @@
 	
 .text
 	main:
-	la $s0, deck #loading in deck
-	la $s1, DECKSIZE #loading deck SIZE
-	move $a0, $s0
-	move $a1, $s1
-	
-	#jal createDeck
-	
-	li $t0, 3
-	li $t1, 4
-	
-	move $a0, $t0
-	jal printInt
-	move $a0, $t1
-	jal printInt
-	
-	move $a0, $t0
-	move $a1, $t1
-	jal swap
-	move $t0, $v0
-	move $t1, $v1
-	
-	la $a0, space
-	jal printStr
-	
-	move $a0, $t0
-	jal printInt
-	move $a0, $t1
-	jal printInt
+		la $s0, deck #loading in deck
+		la $s1, DECKSIZE #loading deck SIZE
+		move $a0, $s0
+		move $a1, $s1
+		
+		#jal createDeck
+		
+		li $t0, 3
+		li $t1, 4
+		
+		move $a0, $t0
+		jal printInt
+		move $a0, $t1
+		jal printInt
+		
+		move $a0, $t0
+		move $a1, $t1
+		jal swap
+		move $t0, $v0
+		move $t1, $v1
+		
+		la $a0, space
+		jal printStr
+		
+		move $a0, $t0
+		jal printInt
+		move $a0, $t1
+		jal printInt
 	
 	
 	j exit
