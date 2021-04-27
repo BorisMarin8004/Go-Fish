@@ -36,9 +36,29 @@
 	
 	#jal createDeck
 	
-	la $t0, 3
+	li $t0, 3
+	li $t1, 4
+	
 	move $a0, $t0
 	jal printInt
+	move $a0, $t1
+	jal printInt
+	
+	move $a0, $t0
+	move $a1, $t1
+	jal swap
+	move $t0, $v0
+	move $t1, $v1
+	
+	la $a0, space
+	jal printStr
+	
+	move $a0, $t0
+	jal printInt
+	move $a0, $t1
+	jal printInt
+	
+	
 	j exit
 
 	printStr:
@@ -54,6 +74,11 @@
 	inputInt:
 		li $v0, 5
 		syscall
+	jr $ra
+	
+	swap:
+		move $v0, $a1
+		move $v1, $a0
 	jr $ra
 
 	#End of Program
