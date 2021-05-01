@@ -120,8 +120,17 @@
 		mult $t2, $t3
 		mflo $t2
 		
-		lw $t0, ARRAY($t2)
+		#lw $t0, ARRAY($t2)
 		move $v0, $t0
+	jr $ra
+	
+	isEmpty:
+		lw $t0, deckTop
+		lw $t1, DECKSIZE
+		
+		seq $t2, $t0, $t1
+		
+		move $v0, $t2
 	jr $ra
 
 
