@@ -57,7 +57,26 @@
 		jal printInt
 		move $a0, $t1
 		jal printInt
+
+		li $s0, 0
+		li $s1, 0
 	
+		whileOuter:
+			beq $s0, 4, endWhileOuter
+				whileInner:
+					beq $s1, 13, endWhileInner
+					move $a0, $s0
+					move $a1, $s1
+					jal getHandsCardValue
+					move $a0, $v0
+					jal printInt
+					addi $s1, $s1, 1
+					j whileInner
+				endWhileInner:
+			li $s1, 0
+			addi $s0, $s0, 1
+			j whileOuter
+		endWhileOuter:
 	
 	j exit
 
@@ -80,6 +99,31 @@
 		move $v0, $a1
 		move $v1, $a0
 	jr $ra
+
+	getHandsCardValue:
+		move $t1, $zero
+		move $t2, $zero
+		move $t3, $zero
+		
+		move $t0, $a0 #playerIndex
+		move $t1, $a1 #cardIndex
+		
+		li $t3, 13
+		
+		mult $t0, $t3
+		mflo $t0
+		
+		add $t2, $t0, $t1
+		
+		li $t3, 4
+		
+		mult $t2, $t3
+		mflo $t2
+		
+		lw $t0, ARRAY($t2)
+		move $v0, $t0
+	jr $ra
+
 
 	#End of Program
 	exit:
