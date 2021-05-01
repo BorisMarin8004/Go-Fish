@@ -123,7 +123,94 @@
 		lw $t0, ARRAY($t2)
 		move $v0, $t0
 	jr $ra
+createDeck: #void createDeck() {
+		li $t1, 52 #deck size
+    		li $t2, 13 # 13
+    		li $t4, 0 # counter for j int j = 0
+    		whileDeck: 
+    			div $t4, $t2 #j % 13;
+    			mfhi $t5	
+    			#   while (j < 52)  {	
+    			sw $t5, 0($a0)  #  deck[j] = j % 13;
+    		
+    			addi $a0, $a0, 4 # moves deck index
+   			addi $t4,$t4,1  #j++
+   		
+    			blt $t4,$t1, whileDeck # while (j < 52)
+     	endWhile:	
+     	jr $ra
+     	
+     	shuffleDeck: #void shuffleDeck() {
+     		addi $sp, $sp -4 # saving addresson the stack
+		sw $ra, 0($sp)
+		
+		move $t7, $a3 # start pointer of deck is at $t7
+		addi $t6, $zero, 4
+		
+     		li $v0, 5 # user input seed number
+		syscall
+     	
+     		move $t0, $v0 #shuffle number = $t0
+     		
+     		mult $t1, $zero # clear $t1
+     		mflo $t1 # $t1 = 0
+     		
+     		addi $t1, $t1, 51 # $t1 = int  i = DECK_SIZE-1;
+     		
+     		
+     		
+     		shuffleLoop:  # for (int i = DECK_SIZE-1; i > 0; i--){
+     		
+     			mult $t2, $zero # clear $t2
+     			mflo $t2 # $t2 = 0
+     			mult $t4, $zero # clear $t4
+     			mflo $t4 # $t4 = 0
+     			mult $t5, $zero # clear $t5
+     			mflo $t5 # $t5 = 0
+     			
+     			add $t5, $t5, $t1 # $t5 = 51
+     			
+     			mult $t5, $t6 # $t5 = i *4 for memory
+     			mflo $t5
+     			 
+     			
+  			addi $t2, $t1, 1  #    int j = shuffleNumber % (i+1);  # $t2 = (i+1)
+     			div $t0, $t2
+     			mfhi $t2 # $t2 = j
+     			
+     			mult $t2, $t6 # $t2 = j * 4 for memory
+     			mflo $t2
+     			
+     			lw $t4, deck($t5) #deck[i]
+ 
+     			#move $a0, $a3 # moving deck[i] to $a0
+     			move $a0, $t4
+     			
+     			lw $t4, deck($t2)
+   
+     			move $a1, $t4
+   			
+   			jal swap #    swap(&deck[i], &deck[j]); swap ($a0, $a1) => $v0 = $a1 $v1= $a0 
+   			
+     			sw $v1, deck($t2) # putting what was in deck[i] in deck[j]
+     
+     			sw $v0, deck($t5) # putting what was in deck[j] in deck[i]
+   			
+   			subi $t1, $t1, 1 # i--
+   			bgtz $t1, shuffleLoop  # i > 0
+   			
+   		shuffleLoopEnd:
+   			
+ 		 #  for(int i = 0; i < DECK_SIZE; i++) {
+ 		 #      printf("*(deck + [%d]) : %d\n", i, *(deck + i) );
+    		
+    	shuffleDeckEnd:
+    		move $v0, $a3
+    		lw $ra, 0($sp)
+		addi $sp, $sp, 4
+		jr $ra
 
+    		
 
 	#End of Program
 	exit:
