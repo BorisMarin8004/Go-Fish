@@ -137,9 +137,9 @@
 	jr $ra
 
 	getHandsCardValue:
-		move $t1, $zero
-		move $t2, $zero
-		move $t3, $zero
+		addi $sp, $sp -4
+		sw $ra, 0($sp)
+		jal clearAllTemps
 		
 		move $t0, $a0 #playerIndex
 		move $t1, $a1 #cardIndex
@@ -156,8 +156,35 @@
 		mult $t2, $t3
 		mflo $t2
 		
-		lw $t0, hands($t2)
+		lw $t0, ARRAY($t2)
 		move $v0, $t0
+		lw $ra, 0($sp)
+	jr $ra
+
+	setHandsCardValue:
+		addi $sp, $sp -4
+		sw $ra, 0($sp)
+		jal clearAllTemps
+		
+		move $t0, $a0 #playerIndex
+		move $t1, $a1 #cardIndex
+		move $t4, $a2 #cardValue
+		
+		li $t3, 13
+		
+		mult $t0, $t3
+		mflo $t0
+		
+		add $t2, $t0, $t1
+		
+		li $t3, 4
+		
+		mult $t2, $t3
+		mflo $t2
+		
+		sw $t4, ARRAY($t2)
+		
+		lw $ra, 0($sp)
 	jr $ra
 	
 	#Keyoni McNair
@@ -243,7 +270,7 @@
     		move $v0, $a3
     		lw $ra, 0($sp)
 		addi $sp, $sp, 4
-		jr $ra
+	jr $ra
 
 	#Keyoni McNair
 	draw: #int draw () {
@@ -255,7 +282,7 @@
     		
   		move $v0,$t7  # return card;
   		
-  		jr $ra
+  	jr $ra
   	
   	#Keyoni McNair
   	dealCards: #void dealCards (int cardPerHand) { card per Hand = 5 arguments $a0 = numberOfPlayers $a3 = deck 
@@ -294,8 +321,8 @@
     			blt $t1, $t2, dealCardsLoopI		#i < cardPerHand
    	dealCardsEnd:
    		move $v0, $a3
-    		lw $ra, 0($sp)
-    		jr $ra
+    	lw $ra, 0($sp)
+    	jr $ra
 
   
 
@@ -308,7 +335,7 @@
 		move $t5, $zero
 		move $t6, $zero
 		move $t7, $zero
-		jr $ra
+	jr $ra
     		
 
 	#End of Program
