@@ -23,7 +23,6 @@ void printOptions(int player);
 void updateScores(int player);
 int draw();
 int isEmpty();
-
 int isFinished();
 void endGame();
 void printScores();
