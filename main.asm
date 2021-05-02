@@ -8,8 +8,9 @@
 	pairLimit: .word 52	#int pairLimit = 2;
 	score: .word 0, 0, 0, 0 #int scores[4] = {0,0,0,0};
 	numberOfPlayers: .space 4 #int numberOfPlayers = 0; 
-	type: .word 0,1,2,3,4,5,6,7,8,9,10,11,12 #int type[13] = {0,1,2,3,4,5,6,7,8,9,10,11,12}; for createDeck()
-	
+	hands: .word 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	four: .word 4
+	thirteen: .word 13
 	# TEXT PHRASES
 	pairAsk: .asciiz "Enter how many pair you want to play(put either 2 or 4):  "
 	seedAsk: .asciiz "Enter an integer between 50 - 1000(seed): "
@@ -29,12 +30,47 @@
 	
 .text
 	main:
-		la $s0, deck #loading in deck
-		la $s1, DECKSIZE #loading deck SIZE
-		move $a0, $s0
-		move $a1, $s1
+		la $s0, deck #loading in deck $s0 = deck
+          	la $s1, DECKSIZE #loading deck SIZE
+          	lw $s2, deckTop #loading deckTop
+          	la $s3, numberOfPlayers # loaind number of players
+          	lw $t8, four
+          	lw $t9, thirteen
+        	move $a0, $s0
+        	move $a1, $s1
+        
+       	 	jal createDeck
+       	 	jal clearAllTemps
+        	move $v0,$s0 # moving deck to back to $s0
+        
+        	la $a0, seedAsk # to move to startGame - Ask for seed number
+        	li $v0, 4
+        	syscall
+        
+        	move $a3, $s0 #move deck to arugement3
+        
+        	jal shuffleDeck
+        	jal clearAllTemps
+        	
+        	move $a0, $v0
+        
+        	la $a0, playerAsk # to move to startGame - Ask for player number (2-4)
+        	li $v0, 4
+        	syscall
+        	
+        	li $v0, 5 # user input playerSize
+		syscall
 		
-		#jal createDeck
+        	move $s3,$v0 # update playerSize
+        	
+        	move $a3, $s0 # move deck to Arguemnt 3 for next function
+        	move $a0,$s3 # move player size to arument 0 
+        	
+        	jal dealCards
+        	jal clearAllTemps
+        	
+		
+
 		
 		li $t0, 3
 		li $t1, 4
@@ -120,10 +156,12 @@
 		mult $t2, $t3
 		mflo $t2
 		
-		lw $t0, ARRAY($t2)
+		lw $t0, hands($t2)
 		move $v0, $t0
 	jr $ra
-createDeck: #void createDeck() {
+	
+	#Keyoni McNair
+	createDeck: #void createDeck() { $a0 = deck
 		li $t1, 52 #deck size
     		li $t2, 13 # 13
     		li $t4, 0 # counter for j int j = 0
@@ -139,8 +177,8 @@ createDeck: #void createDeck() {
     			blt $t4,$t1, whileDeck # while (j < 52)
      	endWhile:	
      	jr $ra
-     	
-     	shuffleDeck: #void shuffleDeck() {
+     	#Keyoni McNair
+     	shuffleDeck: #void shuffleDeck() { $a3 = deck
      		addi $sp, $sp -4 # saving addresson the stack
 		sw $ra, 0($sp)
 		
@@ -161,12 +199,9 @@ createDeck: #void createDeck() {
      		
      		shuffleLoop:  # for (int i = DECK_SIZE-1; i > 0; i--){
      		
-     			mult $t2, $zero # clear $t2
-     			mflo $t2 # $t2 = 0
-     			mult $t4, $zero # clear $t4
-     			mflo $t4 # $t4 = 0
-     			mult $t5, $zero # clear $t5
-     			mflo $t5 # $t5 = 0
+     			move $t2, $zero # clear $t2
+     			move $t4, $zero # clear $t4
+     			move $t5, $zero # clear $t5
      			
      			add $t5, $t5, $t1 # $t5 = 51
      			
@@ -210,6 +245,70 @@ createDeck: #void createDeck() {
 		addi $sp, $sp, 4
 		jr $ra
 
+	#Keyoni McNair
+	draw: #int draw () {
+		mult $s2, $t8 #decktop * 4
+    		mflo $t7
+    		
+		lw $t7, deck($t7)     #int card = deck[deckTop]; $t7 = deck[deckTop[
+    		addi $s2, $s2, 1  # deckTop = deckTop + 1;
+    		
+  		move $v0,$t7  # return card;
+  		
+  		jr $ra
+  	
+  	#Keyoni McNair
+  	dealCards: #void dealCards (int cardPerHand) { card per Hand = 5 arguments $a0 = numberOfPlayers $a3 = deck 
+   		addi $sp, $sp -4 # saving addresson the stack
+		sw $ra, 0($sp)
+		
+   		addi $t1, $t1, 0 #i = 0
+   		addi $t2, $t2, 5 # $t2 = cardPerHand = 5
+   		
+   		dealCardsLoopI: #for(int i = 0; i < cardPerHand; i++){
+   		move $t3, $zero #j = 0
+   		
+    			dealCardsLoopJ: #    for(int j = 0; j < numberOfPlayers; j++){
+    				jal draw #        int card = draw(deck, deckTop); $v0 = card
+    				move $t4, $v0 #move cardnumber to $t4
+    				
+    				
+    				mult $t3, $t9  #       hands[j][card]++; player * 13
+    				mflo $t5
+    				add $t5, $t5, $t4 # (player*13) + card
+    				
+    				mult $t8, $t5  # (player*13) + card * 4 for address
+    				
+ 				mflo $t5 # [j][card]
+ 				
+ 				lw $t6, hands($t5) # get current count at card
+    				
+    				addi $t6, $t6, 1 # current count ++  
+
+    				sw $t6, hands($t5) # updare current count at card   		
+    				
+    				addi $t3, $t3, 1 #j++
+    				blt $t3, $a0, dealCardsLoopJ # j < numberOfPlayers
+    				
+    			addi $t1, $t1, 1 #i++
+    			blt $t1, $t2, dealCardsLoopI		#i < cardPerHand
+   	dealCardsEnd:
+   		move $v0, $a3
+    		lw $ra, 0($sp)
+    		jr $ra
+
+  
+
+	clearAllTemps:
+		move $t0, $zero
+		move $t1, $zero
+		move $t2, $zero
+		move $t3, $zero
+		move $t4, $zero
+		move $t5, $zero
+		move $t6, $zero
+		move $t7, $zero
+		jr $ra
     		
 
 	#End of Program
