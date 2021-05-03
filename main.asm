@@ -324,7 +324,15 @@
     	lw $ra, 0($sp)
     	jr $ra
 
-  
+	#Anthony Herrera
+  	isEmpty: #Checks to see if the deckTop == DECKSIZE. If so, the deck is empty
+		lw $t0, deckTop
+		lw $t1, DECKSIZE
+		
+		seq $t2, $t0, $t1
+		
+		move $v0, $t2
+	jr $ra
 
 	clearAllTemps:
 		move $t0, $zero
