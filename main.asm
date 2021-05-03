@@ -116,26 +116,31 @@
 	
 	j exit
 
+	#Boris Marin
 	printStr:
 		li $v0, 4
 		syscall
 	jr $ra
 
+	#Boris Marin
 	printInt:
 		li $v0, 1
 		syscall
 	jr $ra
 
+	#Boris Marin
 	inputInt:
 		li $v0, 5
 		syscall
 	jr $ra
-	
+
+	#Boris Marin
 	swap:
 		move $v0, $a1
 		move $v1, $a0
 	jr $ra
 
+	#Boris Marin
 	getHandsCardValue:
 		addi $sp, $sp -4
 		sw $ra, 0($sp)
@@ -157,7 +162,8 @@
 		lw $ra, 0($sp)
 		addi $sp, $sp, 4
 	jr $ra
-
+	
+	#Boris Marin
 	setHandsCardValue:
 		addi $sp, $sp -4
 		sw $ra, 0($sp)
