@@ -333,6 +333,20 @@
 		
 		move $v0, $t2
 	jr $ra
+	
+	#Anthony Herrera
+	cardInHand: #Determines whether or not a card is in the hand. $a0 = playerIndex, $a1 = cardIndex
+		addi $sp, $sp -4
+		sw $ra, 0($sp)
+		
+		jal getHandsCardValue
+		
+		#if(hands[targetPlayer][card] > 0); if $v0 > 0 return 1, else 0.
+    		seq $v0, $zero, $v0
+    		
+		lw $ra, 0($sp)
+		addi $sp, $sp, 4
+	jr $ra
 
 	clearAllTemps:
 		move $t0, $zero
