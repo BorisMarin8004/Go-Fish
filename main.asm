@@ -144,21 +144,18 @@
 		move $t0, $a0 #playerIndex
 		move $t1, $a1 #cardIndex
 		
-		li $t3, 13
-		
-		mult $t0, $t3
+		mult $t0, $t9
 		mflo $t0
 		
 		add $t2, $t0, $t1
 		
-		li $t3, 4
-		
-		mult $t2, $t3
+		mult $t2, $t8
 		mflo $t2
 		
-		lw $t0, ARRAY($t2)
+		lw $t0, hands($t2)
 		move $v0, $t0
 		lw $ra, 0($sp)
+		addi $sp, $sp, 4
 	jr $ra
 
 	setHandsCardValue:
@@ -170,21 +167,18 @@
 		move $t1, $a1 #cardIndex
 		move $t4, $a2 #cardValue
 		
-		li $t3, 13
-		
-		mult $t0, $t3
+		mult $t0, $t9
 		mflo $t0
 		
 		add $t2, $t0, $t1
 		
-		li $t3, 4
-		
-		mult $t2, $t3
+		mult $t2, $t8
 		mflo $t2
 		
-		sw $t4, ARRAY($t2)
+		sw $t4, hands($t2)
 		
 		lw $ra, 0($sp)
+		addi $sp, $sp, 4
 	jr $ra
 	
 	#Keyoni McNair
