@@ -116,26 +116,31 @@
 	
 	j exit
 
+	#Boris Marin
 	printStr:
 		li $v0, 4
 		syscall
 	jr $ra
 
+	#Boris Marin
 	printInt:
 		li $v0, 1
 		syscall
 	jr $ra
 
+	#Boris Marin
 	inputInt:
 		li $v0, 5
 		syscall
 	jr $ra
-	
+
+	#Boris Marin
 	swap:
 		move $v0, $a1
 		move $v1, $a0
 	jr $ra
 
+	#Boris Marin
 	getHandsCardValue:
 		addi $sp, $sp -4
 		sw $ra, 0($sp)
@@ -144,23 +149,21 @@
 		move $t0, $a0 #playerIndex
 		move $t1, $a1 #cardIndex
 		
-		li $t3, 13
-		
-		mult $t0, $t3
+		mult $t0, $t9
 		mflo $t0
 		
 		add $t2, $t0, $t1
 		
-		li $t3, 4
-		
-		mult $t2, $t3
+		mult $t2, $t8
 		mflo $t2
 		
-		lw $t0, ARRAY($t2)
+		lw $t0, hands($t2)
 		move $v0, $t0
 		lw $ra, 0($sp)
+		addi $sp, $sp, 4
 	jr $ra
-
+	
+	#Boris Marin
 	setHandsCardValue:
 		addi $sp, $sp -4
 		sw $ra, 0($sp)
@@ -170,21 +173,18 @@
 		move $t1, $a1 #cardIndex
 		move $t4, $a2 #cardValue
 		
-		li $t3, 13
-		
-		mult $t0, $t3
+		mult $t0, $t9
 		mflo $t0
 		
 		add $t2, $t0, $t1
 		
-		li $t3, 4
-		
-		mult $t2, $t3
+		mult $t2, $t8
 		mflo $t2
 		
-		sw $t4, ARRAY($t2)
+		sw $t4, hands($t2)
 		
 		lw $ra, 0($sp)
+		addi $sp, $sp, 4
 	jr $ra
 	
 	#Keyoni McNair
@@ -324,7 +324,29 @@
     	lw $ra, 0($sp)
     	jr $ra
 
-  
+	#Anthony Herrera
+  	isEmpty: #Checks to see if the deckTop == DECKSIZE. If so, the deck is empty
+		lw $t0, deckTop
+		lw $t1, DECKSIZE
+		
+		seq $t2, $t0, $t1
+		
+		move $v0, $t2
+	jr $ra
+	
+	#Anthony Herrera
+	cardInHand: #Determines whether or not a card is in the hand. $a0 = playerIndex, $a1 = cardIndex
+		addi $sp, $sp -4
+		sw $ra, 0($sp)
+		
+		jal getHandsCardValue
+		
+		#if(hands[targetPlayer][card] > 0); if $v0 > 0 return 1, else 0.
+    		seq $v0, $zero, $v0
+    		
+		lw $ra, 0($sp)
+		addi $sp, $sp, 4
+	jr $ra
 
 	clearAllTemps:
 		move $t0, $zero
@@ -336,16 +358,7 @@
 		move $t6, $zero
 		move $t7, $zero
 	jr $ra
-	
-	isEmpty:
-		lw $t0, deckTop
-		lw $t1, DECKSIZE
-		
-		seq $t2, $t0, $t1
-		
-		move $v0, $t2
-	jr $ra
-
+    		
 
 	#End of Program
 	exit:
