@@ -142,8 +142,9 @@
 
 	#Boris Marin
 	getHandsCardValue:
-		addi $sp, $sp -4
-		sw $ra, 0($sp)
+		addi $sp, $sp -36
+		sw $ra, 36($sp)
+		jal saveAllTemps
 		jal clearAllTemps
 		
 		move $t0, $a0 #playerIndex
@@ -159,14 +160,17 @@
 		
 		lw $t0, hands($t2)
 		move $v0, $t0
-		lw $ra, 0($sp)
-		addi $sp, $sp, 4
+		
+		jal restoreAllTemps
+		lw $ra, 36($sp)
+		addi $sp, $sp, 36
 	jr $ra
 	
 	#Boris Marin
 	setHandsCardValue:
-		addi $sp, $sp -4
-		sw $ra, 0($sp)
+		addi $sp, $sp -36
+		sw $ra, 36($sp)
+		jal saveAllTemps
 		jal clearAllTemps
 		
 		move $t0, $a0 #playerIndex
@@ -183,8 +187,9 @@
 		
 		sw $t4, hands($t2)
 		
-		lw $ra, 0($sp)
-		addi $sp, $sp, 4
+		jal restoreAllTemps
+		lw $ra, 36($sp)
+		addi $sp, $sp, 36
 	jr $ra
 
 	#int goFish (int player, int expCard) {
