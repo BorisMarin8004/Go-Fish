@@ -142,8 +142,9 @@
 
 	#Boris Marin
 	getHandsCardValue:
-		addi $sp, $sp -4
-		sw $ra, 0($sp)
+		addi $sp, $sp -36
+		sw $ra, 36($sp)
+		jal saveAllTemps
 		jal clearAllTemps
 		
 		move $t0, $a0 #playerIndex
@@ -159,14 +160,17 @@
 		
 		lw $t0, hands($t2)
 		move $v0, $t0
-		lw $ra, 0($sp)
-		addi $sp, $sp, 4
+		
+		jal restoreAllTemps
+		lw $ra, 36($sp)
+		addi $sp, $sp, 36
 	jr $ra
 	
 	#Boris Marin
 	setHandsCardValue:
-		addi $sp, $sp -4
-		sw $ra, 0($sp)
+		addi $sp, $sp -36
+		sw $ra, 36($sp)
+		jal saveAllTemps
 		jal clearAllTemps
 		
 		move $t0, $a0 #playerIndex
@@ -182,6 +186,112 @@
 		mflo $t2
 		
 		sw $t4, hands($t2)
+		
+		jal restoreAllTemps
+		lw $ra, 36($sp)
+		addi $sp, $sp, 36
+	jr $ra
+
+	#int goFish (int player, int expCard) {
+    	#	if (isEmpty()) {
+        #		printf("All fish is DEAD(deck is empty).\n");
+        #		return 0;
+    	#	} else {
+        #		printf("You are fishing(email) now. (Bad hacker stuff)\n");
+        #		int card = draw(deck, deckTop);
+        #		hands[player][card]++;
+        #		printf("You got: %d\n", card);
+        #		return expCard == card;
+    	#	}
+	#}
+	goFish: #playerIndex #expCard
+		addi $sp, $sp -4
+		sw $ra, 0($sp)
+		jal clearAllTemps
+		
+		move $t0, $a0
+		move $t1, $a1
+		
+		jal isEmpty
+		bne $v0, 1, else
+		if:
+			la $a0, deckEmpty
+			jal printStr
+			li $v0, 0
+			j endIf
+		else:
+			la $a0, goFishText
+			jal printStr
+			
+			jal draw
+			move $t2, $v0
+			
+			move $a0, $t0
+			move $a1, $t2
+			jal getHandsCardValue
+			move $a0, $t0
+			move $a1, $t2
+			addi $a2, $v0, 1
+			jal setHandsCardValue
+			
+			la $a0, youHave
+			jal printStr
+			move $a1, $t2
+			jal printInt
+			
+			seq $t3, $t1, $t2
+			move $v0, $t3
+			j endIf
+		endIf:
+		lw $ra, 0($sp)
+		addi $sp, $sp, 4
+	jr $ra
+	
+	#void moveCards(int srcPlayer, int targetPlayer, int card){
+    	#	printf("You got the card you asked for, in your nasty hands!\n");
+    	#	while(cardInHand(srcPlayer, card)) {
+        #		hands[srcPlayer][card]--;
+        #		hands[targetPlayer][card]++;
+    	#	}		
+	#}
+	#Boris Marin
+	moveCards: #srcPlayer, targetPlayer, card
+		addi $sp, $sp -4
+		sw $ra, 0($sp)
+		jal clearAllTemps
+		
+		move $t0, $a0 #srcPlayer
+		move $t1, $a1 #targetPlayer
+		move $t2, $a2 #cardIndex
+		
+		la $a0, successFish
+		jal printStr
+		
+		while:
+			move $a0, $t0
+			move $a1, $t2
+			jal cardInHand
+			bne $v0, 1, endWhile
+			
+			move $a0, $t0
+			move $a1, $t2
+			jal getHandsCardValue
+			move $a0, $t0
+			move $a1, $t2
+			subi $a2, $v0, 1
+			jal setHandsCardValue
+			
+			
+			move $a0, $t1
+			move $a1, $t2
+			jal getHandsCardValue
+			move $a0, $t1
+			move $a1, $t2
+			addi $a2, $v0, 1
+			jal setHandsCardValue
+			
+			j while
+		endWhile:		
 		
 		lw $ra, 0($sp)
 		addi $sp, $sp, 4
