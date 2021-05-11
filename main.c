@@ -15,17 +15,17 @@ void createDeck();
 void shuffleDeck(int shuffleNumber);
 void swap (int *a, int*b);
 void dealCards (int cardPerHand);
-int goFish (int player, int expCard);
+int goFish (int player, int expCard); // clear t
 void moveCards(int srcPlayer, int targetPlayer, int card);
-void turn(int targetPlayer);
-int cardInHand(int targetPlayer, int card);
-void printOptions(int player);
-void updateScores(int player);
-int draw();
-int isEmpty();
-int isFinished();
+void turn(int targetPlayer); // clear t
+int cardInHand(int targetPlayer, int card); // clear t
+void printOptions(int player); // clear t
+void updateScores(int player); // clear t
+int draw(); // clear t
+int isEmpty(); // remove
+int isFinished(); // clear t
 void endGame();
-void printScores();
+void printScores(); // clear t
 
 
 //Tests
@@ -205,7 +205,7 @@ void turn(int targetPlayer){
             }
         }
     } else {
-        printf("Sorry, cannot yourself ya'\n");
+        printf("Sorry, cannot choose yourself ya'\n");
         turn(targetPlayer);
     }
 }
