@@ -5,18 +5,20 @@
 	#int hands[4][13] = {{0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0}};
 	deckTop: .word  0 #int deckTop = 0;
 	deck: .space 208 #int deck[DECK_SIZE]; 52* 4 bytes
-	pairLimit: .word 52	#int pairLimit = 2;
+	pairLimit: .word 2	#int pairLimit = 2;
 	score: .word 0, 0, 0, 0 #int scores[4] = {0,0,0,0};
 	numberOfPlayers: .space 4 #int numberOfPlayers = 0; 
 	hands: .word 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 	four: .word 4
 	thirteen: .word 13
+	turnOrder: .word 0 # turnOrder/ targetplayer. whose ever turn it is
+	playerToAsk: .word 0
 	# TEXT PHRASES
 	pairAsk: .asciiz "Enter how many pair you want to play(put either 2 or 4):  "
 	seedAsk: .asciiz "Enter an integer between 50 - 1000(seed): "
 	playerAsk: .asciiz "Enter number of players between 2-4: "
-	playerTurn: .asciiz "\nPlayer %d's turn!\n"
-	playerHand: .asciiz "\nPlayer %d's hand!\n"
+	playerTurn: .asciiz "\nPlayer turn - \n"
+	playerHand: .asciiz "\nPlayer hand - \n"
 	youHave: .asciiz "You have " #print number at index and index after this
 	space: .asciiz " " # a space
 	onlyFish: .asciiz "You can only fish, your hand is empty.\n"
@@ -30,15 +32,18 @@
 	
 .text
 	main:
-		la $s0, deck #loading in deck $s0 = deck
-          	la $s1, DECKSIZE #loading deck SIZE
+		lw $s0, pairLimit #loading in pairLimit to #s0 
+          	lw $s1, turnOrder #loading turnplayer
           	lw $s2, deckTop #loading deckTop
-          	la $s3, numberOfPlayers # loaind number of players
+          	la $s3, numberOfPlayers # loading number of players
+		lw $s4, playerToAsk #loading to player to Ask
+		lw $s5, cardToAsk  #loading card to Ask 
+          	
           	lw $t8, four
           	lw $t9, thirteen
-        	move $a0, $s0
-        	move $a1, $s1
-        
+       
+        	la $a0, deck # deck to arugment 0
+        	
        	 	jal createDeck
        	 	jal clearAllTemps
         	move $v0,$s0 # moving deck to back to $s0
@@ -47,8 +52,9 @@
         	li $v0, 4
         	syscall
         
-        	move $a3, $s0 #move deck to arugement3
-        
+        	
+        	
+        	la $a3, deck #deck to arugment 3 
         	jal shuffleDeck
         	jal clearAllTemps
         	
@@ -63,7 +69,7 @@
 		
         	move $s3,$v0 # update playerSize
         	
-        	move $a3, $s0 # move deck to Arguemnt 3 for next function
+        	la $a3, deck # move deck to Arguemnt 3
         	move $a0,$s3 # move player size to arument 0 
         	
         	jal dealCards
@@ -142,9 +148,14 @@
 
 	#Boris Marin
 	getHandsCardValue:
+<<<<<<< HEAD
 		addi $sp, $sp -36
 		sw $ra, 36($sp)
 		jal saveAllTemps
+=======
+		addi $sp, $sp -4
+		sw $ra, 0($sp)
+>>>>>>> 4589f636b5ac43410dfb6a81db54c6a76deeff50
 		jal clearAllTemps
 		
 		move $t0, $a0 #playerIndex
@@ -160,17 +171,27 @@
 		
 		lw $t0, hands($t2)
 		move $v0, $t0
+<<<<<<< HEAD
 		
 		jal restoreAllTemps
 		lw $ra, 36($sp)
 		addi $sp, $sp, 36
+=======
+		lw $ra, 0($sp)
+		addi $sp, $sp, 4
+>>>>>>> 4589f636b5ac43410dfb6a81db54c6a76deeff50
 	jr $ra
 	
 	#Boris Marin
 	setHandsCardValue:
+<<<<<<< HEAD
 		addi $sp, $sp -36
 		sw $ra, 36($sp)
 		jal saveAllTemps
+=======
+		addi $sp, $sp -4
+		sw $ra, 0($sp)
+>>>>>>> 4589f636b5ac43410dfb6a81db54c6a76deeff50
 		jal clearAllTemps
 		
 		move $t0, $a0 #playerIndex
@@ -187,6 +208,7 @@
 		
 		sw $t4, hands($t2)
 		
+<<<<<<< HEAD
 		jal restoreAllTemps
 		lw $ra, 36($sp)
 		addi $sp, $sp, 36
@@ -293,6 +315,8 @@
 			j while
 		endWhile:		
 		
+=======
+>>>>>>> 4589f636b5ac43410dfb6a81db54c6a76deeff50
 		lw $ra, 0($sp)
 		addi $sp, $sp, 4
 	jr $ra
@@ -410,7 +434,7 @@
     				move $t4, $v0 #move cardnumber to $t4
     				
     				
-    				mult $t3, $t9  #       hands[j][card]++; player * 13
+    				mult $t3, $t9  #  hands[j][card]++; player * 13
     				mflo $t5
     				add $t5, $t5, $t4 # (player*13) + card
     				
@@ -431,8 +455,56 @@
     			blt $t1, $t2, dealCardsLoopI		#i < cardPerHand
    	dealCardsEnd:
    		move $v0, $a3
+<<<<<<< HEAD
     	lw $ra, 0($sp)
     	jr $ra
+=======
+    		lw $ra, 0($sp)
+		addi $sp, $sp, 4
+    	jr $ra
+    	
+    	
+    		printOptions: # void printOptions(int player) $a0 = player
+#     			addi $sp, $sp -4 # saving addresson the stack
+# 			sw $ra, 0($sp)
+# 			move $t1, $a0 #$t1 = player
+# 			jal clearAllTemps
+			
+		
+#     			la $a0, playerHand #printf("*Player %d hand\n",player+1);
+# 			jal printStr
+			
+# 			addi $t2, $t1, 1
+# 			jal printInt
+			
+# 			addi $t3, $t3, 0 # int hasCardInHand = 0;
+# 			addi $t4, $t4, 0 #j = 0
+# 			printOptionsLoopJ:  # for (int j = 0; j < 13; j++){
+#    				mult $a3, $t9  #  hands[player][j]++; player * 13
+#     				mflo $t5
+#     				add $t5, $t5, $t4 # (player*13) + J
+    				
+#     				mult $t8, $t5  # (player*13) + j * 4 for address
+    				
+#  				mflo $t5 # [player][j]
+#  				lw  $t5, $
+ 				
+#  				ifHands:
+#  					bnez 
+ 				
+  			 
+   			#     if(hands[player][j] != 0 && hands[player][j] != 4) {
+    			#        if (pairLimit == 4 || (hands[player][j] != 2 && pairLimit == 2)){
+    	          	# printf("You have %d, %d's\n", hands[player][j], j);
+               		 #  hasCardInHand = 1;
+                   	# (!hasCardInHand){
+                 	 # printf("You can only fish, your hand is empty.\n");
+                  	#printf("Which Player would you like to ask for which card in your hand? (Player Number, Card Number): \n");
+		#printOptionsEnd:
+		#	lw $ra, 0($sp)
+		#	addi $sp, $sp, 4
+		
+>>>>>>> 4589f636b5ac43410dfb6a81db54c6a76deeff50
 
 	#Anthony Herrera
   	isEmpty: #Checks to see if the deckTop == DECKSIZE. If so, the deck is empty
@@ -443,6 +515,7 @@
 		
 		move $v0, $t2
 	jr $ra
+<<<<<<< HEAD
 	
 	#Anthony Herrera
 	cardInHand: #Determines whether or not a card is in the hand. $a0 = playerIndex, $a1 = cardIndex
@@ -457,6 +530,8 @@
 		lw $ra, 0($sp)
 		addi $sp, $sp, 4
 	jr $ra
+=======
+>>>>>>> 4589f636b5ac43410dfb6a81db54c6a76deeff50
 
 	clearAllTemps:
 		move $t0, $zero
