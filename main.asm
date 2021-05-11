@@ -451,11 +451,16 @@
 		jal clearAllTemps
 		
 		mult $t0, $t9
+		mflo $t0
 		
-		jal getHandsCardValue
+		add $t2, $t0, $t1
 		
-		#if(hands[targetPlayer][card] > 0); if $v0 > 0 return 1, else 0.
-    		seq $v0, $zero, $v0
+		mult $t2, $t8
+		mflo $t2
+		
+		sw $t4, hands($t2)
+
+    		move $v0, $t4
     		
 		lw $ra, 0($sp)
 		addi $sp, $sp, 4
