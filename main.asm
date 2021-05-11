@@ -448,6 +448,9 @@
 	cardInHand: #Determines whether or not a card is in the hand. $a0 = playerIndex, $a1 = cardIndex
 		addi $sp, $sp -4
 		sw $ra, 0($sp)
+		jal clearAllTemps
+		
+		mult $t0, $t9
 		
 		jal getHandsCardValue
 		
