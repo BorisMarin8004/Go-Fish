@@ -375,13 +375,22 @@
 
 	#Anthony Herrera
   	isEmpty: #Checks to see if the deckTop == DECKSIZE. If so, the deck is empty
-		lw $t0, deckTop
-		lw $t1, DECKSIZE
-
-		seq $t2, $t0, $t1
-
-		move $v0, $t2
+		seq $v0, $s2, 52
 	jr $ra
+
+	#Anthony Herrera
+    cardInHand: #Determines whether or not a card is in the hand. $a0 = playerIndex, $a1 = cardIndex
+        addi $sp, $sp -4
+        sw $ra, 0($sp)
+
+        jal getHandsCardValue
+
+        #if(hands[targetPlayer][card] > 0); if $v0 > 0 return 1, else 0.
+            seq $v0, $zero, $v0
+
+        lw $ra, 0($sp)
+        addi $sp, $sp, 4
+    jr $ra
 
 	clearAllTemps:
 		move $t0, $zero
@@ -393,6 +402,156 @@
 		move $t6, $zero
 		move $t7, $zero
 	jr $ra
+
+        #int goFish (int player, int expCard) {
+        #    if (isEmpty()) {
+        #        printf("All fish is DEAD(deck is empty).\n");
+        #        return 0;
+        #    } else {
+        #        printf("You are fishing(email) now. (Bad hacker stuff)\n");
+        #        int card = draw(deck, deckTop);
+        #        hands[player][card]++;
+        #        printf("You got: %d\n", card);
+        #        return expCard == card;
+        #    }
+        #}
+	    #Boris Marin
+    	goFish: #targetPlayer #cardToAsk
+    		addi $sp, $sp -4
+    		sw $ra, 0($sp)
+    		jal clearAllTemps
+
+    		move $t0, $s1 #targetPlayer
+    		move $t1, $s5 #cardToAsk
+
+    		jal isEmpty
+    		bne $v0, 1, else1
+    		if1:
+    			la $a0, deckEmpty
+    			jal printStr
+    			li $v0, 0
+    			j endIf1
+    		else1:
+    			la $a0, goFishText
+    			jal printStr
+
+    			jal draw
+    			move $t5, $v0 # t2 is cardIndex
+
+                move $t0, $s1 #playerIndex
+                move $t1, $t5 #cardIndex
+                mult $t0, $t9
+                mflo $t0
+                add $t2, $t0, $t1
+                mult $t2, $t8
+                mflo $t2
+                lw $t3, hands($t2)
+
+    			addi $t3, $t3, 1
+
+                move $t0, $s1 #playerIndex
+                move $t1, $t5 #cardIndex
+                mult $t0, $t9
+                mflo $t0
+                add $t2, $t0, $t1
+                mult $t2, $t8
+                mflo $t2
+                sw $t3, hands($t2)
+
+    			la $a0, youHave
+    			jal printStr
+    			move $a1, $t2
+    			jal printInt
+
+    			seq $t3, $t5, $s5
+    			move $v0, $t3
+    			j endIf1
+    		endIf1:
+
+    		lw $ra, 0($sp)
+    		addi $sp, $sp, 4
+    	jr $ra
+
+    	#void moveCards(int srcPlayer, int targetPlayer, int card){
+        	#	printf("You got the card you asked for, in your nasty hands!\n");
+        	#	while(cardInHand(srcPlayer, card)) {
+            #		hands[srcPlayer][card]--;
+            #		hands[targetPlayer][card]++;
+        	#	}
+    	#}
+    	#Boris Marin
+    	moveCards: #srcPlayer, targetPlayer, card
+    		addi $sp, $sp -4
+    		sw $ra, 0($sp)
+    		jal clearAllTemps
+
+    		move $t0, $s4 #srcPlayer
+    		move $t1, $s1 #targetPlayer
+    		move $t2, $s5 #cardIndex
+
+    		la $a0, successFish
+    		jal printStr
+
+    		while1:
+    			move $a0, $s4
+    			move $a1, $s5
+    			jal cardInHand
+    			bne $v0, 1, endWhile1
+
+                #		hands[srcPlayer][card]--;
+    			move $t0, $s4 #playerIndex
+                move $t1, $s5 #cardIndex
+                mult $t0, $t9
+                mflo $t0
+                add $t2, $t0, $t1
+                mult $t2, $t8
+                mflo $t2
+                lw $t0, hands($t2)
+
+    			subi $t3, $t0, 1 #cardValue
+
+                move $t0, $s4 #playerIndex
+                move $t1, $s5 #cardIndex
+                mult $t0, $t9
+                mflo $t0
+                add $t2, $t0, $t1
+                mult $t2, $t8
+                mflo $t2
+                sw $t3, hands($t2)
+
+
+                #		hands[targetPlayer][card]++;
+                move $t0, $s4 #playerIndex
+                move $t1, $s5 #cardIndex
+                mult $t0, $t9
+                mflo $t0
+                add $t2, $t0, $t1
+                mult $t2, $t8
+                mflo $t2
+                lw $t0, hands($t2)
+
+    			addi $t3, $t0, 1
+
+                move $t0, $s4 #playerIndex
+                move $t1, $s5 #cardIndex
+                mult $t0, $t9
+                mflo $t0
+                add $t2, $t0, $t1
+                mult $t2, $t8
+                mflo $t2
+                sw $t3, hands($t2)
+
+    			j while1
+    		endWhile1:
+
+    		lw $ra, 0($sp)
+    		addi $sp, $sp, 4
+    	jr $ra
+
+    	#Boris Marin
+    	turn:
+
+    	jr $ra
 
 
 	#End of Program
