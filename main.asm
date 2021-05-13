@@ -13,12 +13,13 @@
 	thirteen: .word 13
 	turnOrder: .word 0 # turnOrder/ targetplayer. whose ever turn it is
 	playerToAsk: .word 0
+	cardToAsk: .word 0
 	# TEXT PHRASES
 	pairAsk: .asciiz "Enter how many pair you want to play(put either 2 or 4):  "
 	seedAsk: .asciiz "Enter an integer between 50 - 1000(seed): "
 	playerAsk: .asciiz "Enter number of players between 2-4: "
-	playerTurn: .asciiz "\nPlayer turn - \n"
-	playerHand: .asciiz "\nPlayer hand - \n"
+	playerTurn: .asciiz "\nPlayer turn - "
+	playerHand: .asciiz "\nPlayer hand - "
 	youHave: .asciiz "You have " #print number at index and index after this
 	space: .asciiz " " # a space
 	onlyFish: .asciiz "You can only fish, your hand is empty.\n"
@@ -29,7 +30,8 @@
 	cannotFishSelf: .asciiz "Sorry, cannot yourself ya'\n"
 	playAgainText: .asciiz "Would you like to play again?(1 for yes, 0 for no): \n"
 	playerScores: .asciiz "Here are the scores in order by player: " # Might just be better to print a list of the scores and be less fancy haha
-	
+	lineBreak: .asciiz "\n"
+	s: .asciiz "'s"
 .text
 	main:
 		lw $s0, pairLimit #loading in pairLimit to #s0 
@@ -75,6 +77,9 @@
         	jal dealCards
         	jal clearAllTemps
         	
+        	move $a0, $zero
+        	jal printOptions
+        	 
 		
 
 		
@@ -331,46 +336,91 @@
 		addi $sp, $sp, 4
     	jr $ra
     	
-    	
+    	#Keyoni McNair
     		printOptions: # void printOptions(int player) $a0 = player
-#     			addi $sp, $sp -4 # saving addresson the stack
-# 			sw $ra, 0($sp)
-# 			move $t1, $a0 #$t1 = player
-# 			jal clearAllTemps
-			
+     			addi $sp, $sp -4 # saving addresson the stack
+ 			sw $ra, 0($sp)
+ 			jal clearAllTemps
+ 			
+			move $t1, $a0 #$t1 = player
 		
-#     			la $a0, playerHand #printf("*Player %d hand\n",player+1);
-# 			jal printStr
+    			la $a0, playerHand #printf("*Player %d hand\n",player+1);
+ 			li $v0, 4
+			syscall
 			
-# 			addi $t2, $t1, 1
-# 			jal printInt
+ 			addi $t2, $t1, 1 #Print Player Number
+ 			move $a0, $t2
+ 			li $v0, 1 
+ 			syscall
 			
-# 			addi $t3, $t3, 0 # int hasCardInHand = 0;
-# 			addi $t4, $t4, 0 #j = 0
-# 			printOptionsLoopJ:  # for (int j = 0; j < 13; j++){
-#    				mult $a3, $t9  #  hands[player][j]++; player * 13
-#     				mflo $t5
-#     				add $t5, $t5, $t4 # (player*13) + J
+ 			addi $t3, $t3, 0 # int hasCardInHand = 0;
+			addi $t4, $t4, 0 #j = 0
+ 			printOptionsLoopJ:  # for (int j = 0; j < 13; j++){
+   				mult $t1, $t9  #  hands[player][j]++; player * 13
+     				mflo $t5
+     				add $t5, $t5, $t4 # (player*13) + J
     				
-#     				mult $t8, $t5  # (player*13) + j * 4 for address
+     				mult $t8, $t5  # (player*13) + j * 4 for address
     				
-#  				mflo $t5 # [player][j]
-#  				lw  $t5, $
+  				mflo $t5 # [player][j]
+  				lw $t5, hands($t5)
  				
-#  				ifHands:
-#  					bnez 
- 				
+				ifHands:
+  					beqz $t5, printOptionsLoopJEnd #hands[player][j] != 0
+  					beq $t5, 4, printOptionsLoopJEnd #hands[player][j] != 4
+ 					ifPairLimit:
+ 					beq $s0, 4, cardHand #if pairLimit == 4 ||
+  			 		beq $t5, 2, printOptionsLoopJEnd #(hands[player][j] != 2 
+  			 		bne $s0, 2, printOptionsLoopJEnd #&& pairLimit == 2)
+  			 			cardHand: #printf("You have %d, %d's\n", hands[player][j], j);
+  			 			la $a0, youHave
+						li $v0, 4
+						syscall
+						
+						li $v0, 1  # Number of Cards
+						move $a0, $t5 
+						syscall
+						
+						la $a0, space
+						li $v0, 4
+						syscall
+						
+						li $v0, 1  # Card Number
+						move $a0, $t4 
+						syscall
+						
+						la $a0, s
+						li $v0, 4
+						syscall
+						
+						la $a0, lineBreak
+						li $v0, 4
+						syscall
+						
+						li $t3, 1 # cardInHand = 1
+						j  printOptionsLoopJEnd
+  			 		
+  			 printOptionsLoopJEnd:
+  			 	addi $t4, $t4, 1 #j++
+  			 	blt $t4, $t9, printOptionsLoopJ
   			 
-   			#     if(hands[player][j] != 0 && hands[player][j] != 4) {
-    			#        if (pairLimit == 4 || (hands[player][j] != 2 && pairLimit == 2)){
-    	          	# printf("You have %d, %d's\n", hands[player][j], j);
-               		 #  hasCardInHand = 1;
-                   	# (!hasCardInHand){
-                 	 # printf("You can only fish, your hand is empty.\n");
-                  	#printf("Which Player would you like to ask for which card in your hand? (Player Number, Card Number): \n");
-		#printOptionsEnd:
-		#	lw $ra, 0($sp)
-		#	addi $sp, $sp, 4
+   			beqz $t3, emptyHand #(!hasCardInHand)
+   			j askQuestion
+   			emptyHand:
+   			  	la $a0, onlyFish #printf("You can only fish, your hand is empty.\n");
+				li $v0, 4
+				syscall
+				j printOptionsEnd
+          
+          		askQuestion:
+                   		la $a0, turnAsk #printf("Which Player would you like to ask for which card in your hand? (Player Number, Card Number): \n");
+				li $v0, 4
+				syscall
+
+		printOptionsEnd:
+			lw $ra, 0($sp)
+			addi $sp, $sp, 4
+			jr $ra
 		
 
 	#Anthony Herrera
