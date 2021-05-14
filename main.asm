@@ -379,20 +379,18 @@
         	
         	move $a0, $zero
         	jal printOptions
-        	 
-		li $s6, 0 #turnOrder = 0
 		
 		while: #while !isFinished
 			jal isFinished
 			beq $v0, 1, end
 			while2: #while (turnOrder != playerSize)
-				beq $s6, $s3, end2
+				beq $s1, $s3, end2
 			
 				la $a0, playerTurn # "\nPlayer turn - "
 				li $v0, 4
 				syscall
 			
-				addi $t0, $s6, 1
+				addi $t0, $s1, 1
 				la $a0, $t0
 				li $v0, 1
 				syscall
@@ -402,7 +400,7 @@
 				
 				beq $v0, 1, end
 				
-				addi $s6, 1
+				addi $s1, $s1, 1
 				j while2
 			end2:
 				move $s6, $zero
