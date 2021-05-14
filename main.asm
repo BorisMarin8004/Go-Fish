@@ -1,36 +1,36 @@
 #Insert Header Here
 .data
-	
-	# TEXT PHRASES
-	#int hands[4][13] = {{0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0}};
+
 	DECKSIZE: .word 52 #const int DECK_SIZE = 52;
-	cannotFishSelf: .asciiz "Sorry, cannot choose yourself ya'\n"
 	cardToAsk: .word 0
 	deck: .space 208 #int deck[DECK_SIZE]; 52* 4 bytes
-	deckEmpty: .asciiz "All fish is DEAD(deck is empty).\n"
 	deckTop: .word  0 #int deckTop = 0;
 	four: .word 4
-	goFishText: .asciiz "You are fishing(email) now. (Bad hacker stuff)\n"
+	#int hands[4][13] = {{0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0}};
 	hands: .word 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-	lineBreak: .asciiz "\n"
 	numberOfPlayers: .space 4 #int numberOfPlayers = 0;
+	pairLimit: .word 2	#int pairLimit = 2;
+	playerToAsk: .word 0
+	score: .word 0, 0, 0, 0 #int scores[4] = {0,0,0,0};
+	thirteen: .word 13
+	turnOrder: .word 0 # turnOrder/ targetplayer. whose ever turn it is
+	# TEXT PHRASES
+	cannotFishSelf: .asciiz "Sorry, cannot choose yourself ya'\n"
+	deckEmpty: .asciiz "All fish is DEAD(deck is empty).\n"
+	goFishText: .asciiz "You are fishing(email) now. (Bad hacker stuff)\n"
+	lineBreak: .asciiz "\n"
 	onlyFish: .asciiz "You can only fish, your hand is empty.\n"
 	pairAsk: .asciiz "Enter how many pair you want to play(put either 2 or 4):  "
-	pairLimit: .word 2	#int pairLimit = 2;
 	playAgainText: .asciiz "Would you like to play again?(1 for yes, 0 for no): \n"
 	playerAsk: .asciiz "Enter number of players between 2-4: "
 	playerHand: .asciiz "\nPlayer hand - "
 	playerScores: .asciiz "Here are the scores in order by player: " # Might just be better to print a list of the scores and be less fancy haha
-	playerToAsk: .word 0
 	playerTurn: .asciiz "\nPlayer turn - "
 	s: .asciiz "'s"
-	score: .word 0, 0, 0, 0 #int scores[4] = {0,0,0,0};
 	seedAsk: .asciiz "Enter an integer between 50 - 1000(seed): "
 	space: .asciiz " " # a space
 	successFish: .asciiz "You got the card you asked for, in your nasty hands!\n"
-	thirteen: .word 13
 	turnAsk: .asciiz "Which Player would you like to ask for which card in your hand? (Player Number, Card Number): \n"
-	turnOrder: .word 0 # turnOrder/ targetplayer. whose ever turn it is
 	youHave: .asciiz "You have " #print number at index and index after this
 .text
 	main:
