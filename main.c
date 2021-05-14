@@ -6,7 +6,7 @@ int deckTop = 0;
 int deck[DECK_SIZE];
 int pairLimit = 2;
 int scores[4] = {0,0,0,0};
-int numberOfPlayers = 0; 
+int numberOfPlayers = 0;
 
 
 //ALL PLAYERS *****MUST***** BE REFERENCED AS INDEXES OF HANDS ARRAY
@@ -254,7 +254,7 @@ int isFinished() {
 //Prints each set made by players
 void printScores(){
     printf("----Printing Scores----\n");
-    for (int i = 0; i < numberOfPlayers; i++){ 
+    for (int i = 0; i < numberOfPlayers; i++){
         printf("*Player %d score: %d\n", i+1, scores[i]);
     }
 }
