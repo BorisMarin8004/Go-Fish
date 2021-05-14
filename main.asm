@@ -382,22 +382,31 @@
         	 
 		li $s6, 0 #turnOrder = 0
 		
-		while: #while (turnOrder != playerSize)
-			beq $s6, $s3, end
-			
-			la $a0, playerTurn # "\nPlayer turn - "
-			li $v0, 4
-			syscall
-			
-			addi $t2, $s6, 1
-			la $a0, $t0
-			li $v0, 1
-			syscall
-			
-			jal turn
+		while: #while !isFinished
 			jal isFinished
+			beq $v0, 1, end
+			while2: #while (turnOrder != playerSize)
+				beq $s6, $s3, end2
 			
+				la $a0, playerTurn # "\nPlayer turn - "
+				li $v0, 4
+				syscall
 			
+				addi $t0, $s6, 1
+				la $a0, $t0
+				li $v0, 1
+				syscall
+			
+				jal turn
+				jal isFinished
+				
+				beq $v0, 1, end
+				
+				addi $s6, 1
+				j while2
+			end2:
+				move $s6, $zero
+				j while
 		end:
 	
 	j exit
