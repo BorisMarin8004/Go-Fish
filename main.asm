@@ -11,12 +11,13 @@
 	numberOfPlayers: .space 4 #int numberOfPlayers = 0;
 	pairLimit: .word 2	#int pairLimit = 2;
 	playerToAsk: .word 0
-	score: .word 0, 0, 0, 0 #int scores[4] = {0,0,0,0};
+	scores: .word 0, 0, 0, 0 #int scores[4] = {0,0,0,0};
 	thirteen: .word 13
 	turnOrder: .word 0 # turnOrder/ targetplayer. whose ever turn it is
 	# TEXT PHRASES
 	cannotFishSelf: .asciiz "Sorry, cannot choose yourself ya'\n"
 	deckEmpty: .asciiz "All fish is DEAD(deck is empty).\n"
+	endGameText: .asciiz "\nEND GAME!\n"
 	goFishText: .asciiz "You are fishing(email) now. (Bad hacker stuff)\n"
 	lineBreak: .asciiz "\n"
 	onlyFish: .asciiz "You can only fish, your hand is empty.\n"
@@ -26,6 +27,9 @@
 	playerHand: .asciiz "\nPlayer hand - "
 	playerScores: .asciiz "Here are the scores in order by player: " # Might just be better to print a list of the scores and be less fancy haha
 	playerTurn: .asciiz "\nPlayer turn - "
+	printing: .asciiz "----Printing Scores----\n"
+	playerText: .asciiz "*Player "
+	scoreText: .asciiz " score: "
 	s: .asciiz "'s"
 	seedAsk: .asciiz "Enter an integer between 50 - 1000(seed): "
 	space: .asciiz " " # a space
@@ -34,98 +38,7 @@
 	youHave: .asciiz "You have " #print number at index and index after this
 .text
 	main:
-		lw $s0, pairLimit #loading in pairLimit to #s0
-        lw $s1, turnOrder #loading turnplayer
-        lw $s2, deckTop #loading deckTop
-        la $s3, numberOfPlayers # loading number of players
-		lw $s4, playerToAsk #loading to player to Ask
-		lw $s5, cardToAsk  #loading card to Ask
-
-          	lw $t8, four
-          	lw $t9, thirteen
-
-        	la $a0, deck # deck to arugment 0
-
-       	 	jal createDeck
-       	 	jal clearAllTemps
-        	move $v0,$s0 # moving deck to back to $s0
-
-        	la $a0, seedAsk # to move to startGame - Ask for seed number
-        	li $v0, 4
-        	syscall
-
-
-
-        	la $a3, deck #deck to arugment 3
-        	jal shuffleDeck
-        	jal clearAllTemps
-
-        	move $a0, $v0
-
-        	la $a0, playerAsk # to move to startGame - Ask for player number (2-4)
-        	li $v0, 4
-        	syscall
-
-        	li $v0, 5 # user input playerSize
-		syscall
-
-        	move $s3,$v0 # update playerSize
-
-        	la $a3, deck # move deck to Arguemnt 3
-        	move $a0,$s3 # move player size to arument 0
-
-        	jal dealCards
-        	jal clearAllTemps
-
-        	move $a0, $zero
-        	jal printOptions
-
-
-
-
-		li $t0, 3
-		li $t1, 4
-
-		move $a0, $t0
-		jal printInt
-		move $a0, $t1
-		jal printInt
-
-		move $a0, $t0
-		move $a1, $t1
-		jal swap
-		move $t0, $v0
-		move $t1, $v1
-
-		la $a0, space
-		jal printStr
-
-		move $a0, $t0
-		jal printInt
-		move $a0, $t1
-		jal printInt
-
-		li $s0, 0
-		li $s1, 0
-
-		whileOuter:
-			beq $s0, 4, endWhileOuter
-				whileInner:
-					beq $s1, 13, endWhileInner
-					move $a0, $s0
-					move $a1, $s1
-					jal getHandsCardValue
-					move $a0, $v0
-					jal printInt
-					addi $s1, $s1, 1
-					j whileInner
-				endWhileInner:
-			li $s1, 0
-			addi $s0, $s0, 1
-			j whileOuter
-		endWhileOuter:
-
-	j exit
+	jal startGame
 
 	#Boris Marin
 	printStr:
@@ -342,9 +255,9 @@
         sw $ra, 0($sp)
         jal clearAllTemps
 
-        move $t1, $a0 #$t1 = player
+        move $t1, $s1# t1 = player
 
-            la $a0, playerHand #printf("*Player %d hand\n",player+1);
+        la $a0, playerHand #printf("*Player %d hand\n",player+1);
         li $v0, 4
         syscall
 
@@ -352,6 +265,11 @@
         move $a0, $t2
         li $v0, 1
         syscall
+        
+        la $a0, lineBreak
+        li $v0, 4
+        syscall
+
 
         addi $t3, $t3, 0 # int hasCardInHand = 0;
         addi $t4, $t4, 0 #j = 0
@@ -373,6 +291,7 @@
                 beq $t5, 2, printOptionsLoopJEnd #(hands[player][j] != 2
                 bne $s0, 2, printOptionsLoopJEnd #&& pairLimit == 2)
                     cardHand: #printf("You have %d, %d's\n", hands[player][j], j);
+                   
                     la $a0, youHave
                     li $v0, 4
                     syscall
@@ -423,23 +342,36 @@
         jr $ra
 
     #Keyoni McNair
-    updateScores:	#void updateScores(int player){ $s0 = playerIndex
-        move $t1, $s4		 # for (int j = 0; j < 13; j++){
+    updateScores:	#void updateScores(int player){ $s4 = playerIndex
+        addi $sp, $sp -4 # saving addresson the stack
+        sw $ra, 0($sp)
+        jal clearAllTemps
+        
+        move $t1, $s4 # for (int j = 0; j < 13; j++){ 
             move $t2, $zero #j = 0
+            
             updateScoreLoopJ:	#   if (hands[player][j] == pairLimit) {
                 mult $t1, $t9  #  hands[player][j]++; player * 13
                 mflo $t3 # $t3 = player*13
                 add $t4, $t3, $t2 # (player*13) + J
-                mult $t5, $t4  # (player*13) + j * 4 for address
+                mult $t4, $t8  # (player*13) + j * 4 for address
             mflo $t6 # [player][j]
-            lw $t5, hands($t6) # card value
+            
+            lw $t5, hands($t6) # card value #   if (hands[player][j] == pairLimit) {
+            bne $t5, $s0,updateScoreLoopJEnd
             sub $t5, $t5, $s0
-            sw $t5, hands($t6)#        hands[player][j]-=pairLimit;
-            lw $t6, scores($t3)#       scores[player]++;
+            
+            sw $t5, hands($t6) #    hands[player][j]-=pairLimit;
+            lw $t6, scores($t3) #      scores[player]++;
             addi $t6, $t6, 1
             sw $t6, scores($t3)
+            
+            updateScoreLoopJEnd:
             addi $t2, $t2, 1 #j++
             blt $t2, $t9, updateScoreLoopJ
+            
+        lw $ra, 0($sp)
+        addi $sp, $sp, 4
     jr $ra
 
     #Anthony Herrera
@@ -487,34 +419,31 @@
             jal dealCards
             jal clearAllTemps
 
-            move $a0, $zero
-            jal printOptions
-
-        while: #while !isFinished
+        whileNotisFinished: #while !isFinished
             jal isFinished
             beq $v0, 1, end
-            while2: #while (turnOrder != playerSize)
-                beq $s1, $s3, end2
+            whileRound: #while (turnOrder != playerSize)
+                beq $s1, $s3, endRound
 
-                la $a0, playerTurn # "\nPlayer turn - "
+                la $a0, playerTurn # prints"\nPlayer turn - "
                 li $v0, 4
                 syscall
 
-                addi $t0, $s1, 1
-                la $a0, $t0
+                addi $t0, $s1, 1 #Prints player number
+                move $a0, $t0
                 li $v0, 1
                 syscall
 
-                jal turn
+                jal turn 
                 jal isFinished
 
                 beq $v0, 1, end
 
                 addi $s1, $s1, 1
-                j while2
-            end2:
-                move $s6, $zero
-                j while
+                j whileRound
+            endRound:
+                move $s1, $zero
+                j whileNotisFinished
         end:
 
     j exit
@@ -533,15 +462,16 @@
     cardInHand: #Determines whether or not a card is in the hand. $a0 = playerIndex, $a1 = cardIndex
         addi $sp, $sp -4
         sw $ra, 0($sp)
-        mult $s0, $t9 # player * 13
+        mult $s4, $t9 # player * 13
         mflo $t0
         add $t0, $t0, $s5 # player * 13 + card
         mult $t0, $t8 # (Player * 13 + card) * 4
         mflo $t0
-        sw $t4, hands($t0)
+        lw $t4, hands($t0)
             move $v0, $t4
         #if(hands[targetPlayer][card] > 0); if $v0 > 0 return 1, else 0.
            seq $v0, $zero, $v0
+
         lw $ra, 0($sp)
         addi $sp, $sp, 4
         jr $ra
@@ -623,8 +553,8 @@
 
     	lw $t0, numberOfPlayers
     	li $t1, 0
-    for:
-    	beq $t1, $t0, end
+    forPrintScores:
+    	beq $t1, $t0, endPrintScoresLoop
 
     	li $v0, 4
     	la $a0, playerText
@@ -640,7 +570,7 @@
 
     	move $a0, $t1
     	sll $a0, $a0, 2
-    	la $s1, score
+    	la $s1, scores
     	add $s1, $s1, $a0
 
     	li $v0, 1
@@ -648,12 +578,12 @@
     	syscall
 
     	li $v0, 4
-    	la $a0, newLineText
+    	la $a0, lineBreak
     	syscall
 
     	addi $t1, $t1, 1
-    	j for
-    end:
+    	j forPrintScores
+    endPrintScoresLoop:
     	jr $ra
     endPrintScores:
     	jr $ra
@@ -681,12 +611,12 @@
     		jal isEmpty
     		bne $v0, 1, else1
     		if1:
-    			la $a0, deckEmpty
+    			la $a0, deckEmpty #print deck is empty
     			jal printStr
     			li $v0, 0
     			j endIf1
     		else1:
-    			la $a0, goFishText
+    			la $a0, goFishText # print go fish!
     			jal printStr
 
     			jal draw
@@ -694,27 +624,20 @@
 
                 move $t0, $s1 #playerIndex
                 move $t1, $t5 #cardIndex
-                mult $t0, $t9
+                mult $t0, $t9 # player * 13
                 mflo $t0
-                add $t2, $t0, $t1
-                mult $t2, $t8
+                add $t2, $t0, $t1 #player * 13 + card
+                mult $t2, $t8 #(player * 13 + card) * 4 for memory
                 mflo $t2
                 lw $t3, hands($t2)
 
     			addi $t3, $t3, 1
 
-                move $t0, $s1 #playerIndex
-                move $t1, $t5 #cardIndex
-                mult $t0, $t9
-                mflo $t0
-                add $t2, $t0, $t1
-                mult $t2, $t8
-                mflo $t2
                 sw $t3, hands($t2)
 
-    			la $a0, youHave
+    			la $a0, youHave #print you have...
     			jal printStr
-    			move $a1, $t2
+    			move $a0, $t5 #print card number recieved
     			jal printInt
 
     			seq $t3, $t5, $s5
@@ -743,39 +666,31 @@
     		move $t1, $s1 #targetPlayer
     		move $t2, $s5 #cardIndex
 
-    		la $a0, successFish
+    		la $a0, successFish # print "You got the card you asked for.."
     		jal printStr
 
-    		while1:
-    			move $a0, $s4
-    			move $a1, $s5
+    		whileCardInHand:
+    			
     			jal cardInHand
-    			bne $v0, 1, endWhile1
+    			bne $v0, 1, endWhileCardInHand
 
                 #		hands[srcPlayer][card]--;
     			move $t0, $s4 #playerIndex
                 move $t1, $s5 #cardIndex
-                mult $t0, $t9
+                mult $t0, $t9 # player * 13
                 mflo $t0
-                add $t2, $t0, $t1
+                add $t2, $t0, $t1 #(player * 13) + card
                 mult $t2, $t8
-                mflo $t2
+                mflo $t2 	#((player * 13) + card) * 4
                 lw $t0, hands($t2)
 
-    			subi $t3, $t0, 1 #cardValue
-
-                move $t0, $s4 #playerIndex
-                move $t1, $s5 #cardIndex
-                mult $t0, $t9
-                mflo $t0
-                add $t2, $t0, $t1
-                mult $t2, $t8
-                mflo $t2
-                sw $t3, hands($t2)
+    	    subi $t0, $t0, 1 #cardValue
+    			
+                sw $t0, hands($t2)
 
 
-                #		hands[targetPlayer][card]++;
-                move $t0, $s4 #playerIndex
+                #	hands[targetPlayer][card]++;
+                move $t0, $s1 #playerIndex
                 move $t1, $s5 #cardIndex
                 mult $t0, $t9
                 mflo $t0
@@ -784,19 +699,12 @@
                 mflo $t2
                 lw $t0, hands($t2)
 
-    			addi $t3, $t0, 1
+    	    addi $t0, $t0, 1
 
-                move $t0, $s4 #playerIndex
-                move $t1, $s5 #cardIndex
-                mult $t0, $t9
-                mflo $t0
-                add $t2, $t0, $t1
-                mult $t2, $t8
-                mflo $t2
-                sw $t3, hands($t2)
+                sw $t0, hands($t2)
 
-    			j while1
-    		endWhile1:
+    	     j whileCardInHand
+    		endWhileCardInHand:
 
     		lw $ra, 0($sp)
     		addi $sp, $sp, 4
@@ -849,31 +757,31 @@
         move $s5, $v0
         subi $s4, $s4, 1
 
-        beq $s1, $s4, elseTurnOuter
+        beq $s1, $s4, elseSelfAsk
             jal cardInHand
-            bne $v0, 1, elseTurnInner
+            bne $v0, 1, elseGoFish
                 jal moveCards
                 jal isFinished
-                bne $v0, 1, notFinished
+                bne $v0, 1, notFinished1
                     jal endGame
-                notFinished:
+                notFinished1:
                     jal turn
                     jal clearAllTemps
                     j finishTurn
-            elseTurnInner1:
+            elseGoFish:
                 jal goFish
                 bne $v0, 1, badFish
                     jal isFinished
-                    bne $v0, 1, notFinished
+                    bne $v0, 1, notFinished2
                         jal endGame
-                    notFinished:
+                    notFinished2:
                         jal turn
                         jal clearAllTemps
                         j finishTurn
                 badFish:
                     j finishTurn
 
-        elseTurnOuter:
+        elseSelfAsk:
             la $a0, cannotFishSelf
             jal printStr
 
