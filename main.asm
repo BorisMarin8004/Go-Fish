@@ -35,9 +35,9 @@
 .text
 	main:
 		lw $s0, pairLimit #loading in pairLimit to #s0
-          	lw $s1, turnOrder #loading turnplayer
-          	lw $s2, deckTop #loading deckTop
-          	la $s3, numberOfPlayers # loading number of players
+        lw $s1, turnOrder #loading turnplayer
+        lw $s2, deckTop #loading deckTop
+        la $s3, numberOfPlayers # loading number of players
 		lw $s4, playerToAsk #loading to player to Ask
 		lw $s5, cardToAsk  #loading card to Ask
 
@@ -421,6 +421,26 @@
         lw $ra, 0($sp)
         addi $sp, $sp, 4
         jr $ra
+
+    #Keyoni McNair
+    updateScores:	#void updateScores(int player){ $s0 = playerIndex
+        move $t1, $s4		 # for (int j = 0; j < 13; j++){
+            move $t2, $zero #j = 0
+            updateScoreLoopJ:	#   if (hands[player][j] == pairLimit) {
+                mult $t1, $t9  #  hands[player][j]++; player * 13
+                mflo $t3 # $t3 = player*13
+                add $t4, $t3, $t2 # (player*13) + J
+                mult $t5, $t4  # (player*13) + j * 4 for address
+            mflo $t6 # [player][j]
+            lw $t5, hands($t6) # card value
+            sub $t5, $t5, $s0
+            sw $t5, hands($t6)#        hands[player][j]-=pairLimit;
+            lw $t6, scores($t3)#       scores[player]++;
+            addi $t6, $t6, 1
+            sw $t6, scores($t3)
+            addi $t2, $t2, 1 #j++
+            blt $t2, $t9, updateScoreLoopJ
+    jr $ra
 
     #Anthony Herrera
 	startGame:
