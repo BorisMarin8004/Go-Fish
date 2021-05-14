@@ -32,80 +32,74 @@
 	playerScores: .asciiz "Here are the scores in order by player: " # Might just be better to print a list of the scores and be less fancy haha
 	lineBreak: .asciiz "\n"
 	s: .asciiz "'s"
-	endGameText: .asciiz "ENDGAME\n"
-	numberOfPlayers: .space 4
-	printing: .asciiz "----Printing Scores----\n"
-	playerText: .asciiz "*Player "
-	scoreText: .asciiz " score: "
-	newLineText: .asciiz "\n"
 .text
 	main:
-		lw $s0, pairLimit #loading in pairLimit to #s0 
+		lw $s0, pairLimit #loading in pairLimit to #s0
           	lw $s1, turnOrder #loading turnplayer
           	lw $s2, deckTop #loading deckTop
           	la $s3, numberOfPlayers # loading number of players
 		lw $s4, playerToAsk #loading to player to Ask
-		lw $s5, cardToAsk  #loading card to Ask 
-          	
+		lw $s5, cardToAsk  #loading card to Ask
+
           	lw $t8, four
           	lw $t9, thirteen
-       
+
         	la $a0, deck # deck to arugment 0
-        	
+
        	 	jal createDeck
        	 	jal clearAllTemps
         	move $v0,$s0 # moving deck to back to $s0
-        
+
         	la $a0, seedAsk # to move to startGame - Ask for seed number
         	li $v0, 4
         	syscall
-        
-        	
-        	
-        	la $a3, deck #deck to arugment 3 
+
+
+
+        	la $a3, deck #deck to arugment 3
         	jal shuffleDeck
         	jal clearAllTemps
-        	
+
         	move $a0, $v0
-        
+
         	la $a0, playerAsk # to move to startGame - Ask for player number (2-4)
         	li $v0, 4
         	syscall
-        	
+
         	li $v0, 5 # user input playerSize
 		syscall
-		
+
         	move $s3,$v0 # update playerSize
-        	
+
         	la $a3, deck # move deck to Arguemnt 3
-        	move $a0,$s3 # move player size to arument 0 
-        	
+        	move $a0,$s3 # move player size to arument 0
+
         	jal dealCards
         	jal clearAllTemps
-        	
+
         	move $a0, $zero
         	jal printOptions
-        	 
-		
 
-		
+
+
+
 		li $t0, 3
 		li $t1, 4
-		
+
 		move $a0, $t0
 		jal printInt
 		move $a0, $t1
 		jal printInt
-		
+
 		move $a0, $t0
 		move $a1, $t1
 		jal swap
 		move $t0, $v0
 		move $t1, $v1
-		
+
 		la $a0, space
 		jal printStr
-		
+
 		move $a0, $t0
 		jal printInt
 		move $a0, $t1
@@ -113,7 +107,7 @@
 
 		li $s0, 0
 		li $s1, 0
-	
+
 		whileOuter:
 			beq $s0, 4, endWhileOuter
 				whileInner:
@@ -130,7 +124,7 @@
 			addi $s0, $s0, 1
 			j whileOuter
 		endWhileOuter:
-	
+
 	j exit
 
 	#Boris Marin
@@ -162,127 +156,127 @@
 		addi $sp, $sp -4
 		sw $ra, 0($sp)
 		jal clearAllTemps
-		
+
 		move $t0, $a0 #playerIndex
 		move $t1, $a1 #cardIndex
-		
+
 		mult $t0, $t9
 		mflo $t0
-		
+
 		add $t2, $t0, $t1
-		
+
 		mult $t2, $t8
 		mflo $t2
-		
+
 		lw $t0, hands($t2)
 		move $v0, $t0
 		lw $ra, 0($sp)
 		addi $sp, $sp, 4
 	jr $ra
-	
+
 	#Boris Marin
 	setHandsCardValue:
 		addi $sp, $sp -4
 		sw $ra, 0($sp)
 		jal clearAllTemps
-		
+
 		move $t0, $a0 #playerIndex
 		move $t1, $a1 #cardIndex
 		move $t4, $a2 #cardValue
-		
+
 		mult $t0, $t9
 		mflo $t0
-		
+
 		add $t2, $t0, $t1
-		
+
 		mult $t2, $t8
 		mflo $t2
-		
+
 		sw $t4, hands($t2)
-		
+
 		lw $ra, 0($sp)
 		addi $sp, $sp, 4
 	jr $ra
-	
+
 	#Keyoni McNair
 	createDeck: #void createDeck() { $a0 = deck
 		li $t1, 52 #deck size
     		li $t2, 13 # 13
     		li $t4, 0 # counter for j int j = 0
-    		whileDeck: 
+    		whileDeck:
     			div $t4, $t2 #j % 13;
-    			mfhi $t5	
-    			#   while (j < 52)  {	
+    			mfhi $t5
+    			#   while (j < 52)  {
     			sw $t5, 0($a0)  #  deck[j] = j % 13;
-    		
+
     			addi $a0, $a0, 4 # moves deck index
    			addi $t4,$t4,1  #j++
-   		
+
     			blt $t4,$t1, whileDeck # while (j < 52)
-     	endWhile:	
+     	endWhile:
      	jr $ra
      	#Keyoni McNair
      	shuffleDeck: #void shuffleDeck() { $a3 = deck
      		addi $sp, $sp -4 # saving addresson the stack
 		sw $ra, 0($sp)
-		
+
 		move $t7, $a3 # start pointer of deck is at $t7
 		addi $t6, $zero, 4
-		
+
      		li $v0, 5 # user input seed number
 		syscall
-     	
+
      		move $t0, $v0 #shuffle number = $t0
-     		
+
      		mult $t1, $zero # clear $t1
      		mflo $t1 # $t1 = 0
-     		
+
      		addi $t1, $t1, 51 # $t1 = int  i = DECK_SIZE-1;
-     		
-     		
-     		
+
+
+
      		shuffleLoop:  # for (int i = DECK_SIZE-1; i > 0; i--){
-     		
+
      			move $t2, $zero # clear $t2
      			move $t4, $zero # clear $t4
      			move $t5, $zero # clear $t5
-     			
+
      			add $t5, $t5, $t1 # $t5 = 51
-     			
+
      			mult $t5, $t6 # $t5 = i *4 for memory
      			mflo $t5
-     			 
-     			
+
+
   			addi $t2, $t1, 1  #    int j = shuffleNumber % (i+1);  # $t2 = (i+1)
      			div $t0, $t2
      			mfhi $t2 # $t2 = j
-     			
+
      			mult $t2, $t6 # $t2 = j * 4 for memory
      			mflo $t2
-     			
+
      			lw $t4, deck($t5) #deck[i]
- 
+
      			#move $a0, $a3 # moving deck[i] to $a0
      			move $a0, $t4
-     			
+
      			lw $t4, deck($t2)
-   
+
      			move $a1, $t4
-   			
-   			jal swap #    swap(&deck[i], &deck[j]); swap ($a0, $a1) => $v0 = $a1 $v1= $a0 
-   			
+
+   			jal swap #    swap(&deck[i], &deck[j]); swap ($a0, $a1) => $v0 = $a1 $v1= $a0
+
      			sw $v1, deck($t2) # putting what was in deck[i] in deck[j]
-     
+
      			sw $v0, deck($t5) # putting what was in deck[j] in deck[i]
-   			
+
    			subi $t1, $t1, 1 # i--
    			bgtz $t1, shuffleLoop  # i > 0
-   			
+
    		shuffleLoopEnd:
-   			
+
  		 #  for(int i = 0; i < DECK_SIZE; i++) {
  		 #      printf("*(deck + [%d]) : %d\n", i, *(deck + i) );
-    		
+
     	shuffleDeckEnd:
     		move $v0, $a3
     		lw $ra, 0($sp)
@@ -293,149 +287,225 @@
 	draw: #int draw () {
 		mult $s2, $t8 #decktop * 4
     		mflo $t7
-    		
+
 		lw $t7, deck($t7)     #int card = deck[deckTop]; $t7 = deck[deckTop[
     		addi $s2, $s2, 1  # deckTop = deckTop + 1;
-    		
+
   		move $v0,$t7  # return card;
-  		
+
   	jr $ra
-  	
+
   	#Keyoni McNair
-  	dealCards: #void dealCards (int cardPerHand) { card per Hand = 5 arguments $a0 = numberOfPlayers $a3 = deck 
+  	dealCards: #void dealCards (int cardPerHand) { card per Hand = 5 arguments $a0 = numberOfPlayers $a3 = deck
    		addi $sp, $sp -4 # saving addresson the stack
 		sw $ra, 0($sp)
-		
+
    		addi $t1, $t1, 0 #i = 0
    		addi $t2, $t2, 5 # $t2 = cardPerHand = 5
-   		
+
    		dealCardsLoopI: #for(int i = 0; i < cardPerHand; i++){
    		move $t3, $zero #j = 0
-   		
+
     			dealCardsLoopJ: #    for(int j = 0; j < numberOfPlayers; j++){
     				jal draw #        int card = draw(deck, deckTop); $v0 = card
     				move $t4, $v0 #move cardnumber to $t4
-    				
-    				
+
+
     				mult $t3, $t9  #  hands[j][card]++; player * 13
     				mflo $t5
     				add $t5, $t5, $t4 # (player*13) + card
-    				
-    				mult $t8, $t5  # (player*13) + card * 4 for address
-    				
- 				mflo $t5 # [j][card]
- 				
- 				lw $t6, hands($t5) # get current count at card
-    				
-    				addi $t6, $t6, 1 # current count ++  
 
-    				sw $t6, hands($t5) # updare current count at card   		
-    				
+    				mult $t8, $t5  # (player*13) + card * 4 for address
+
+ 				mflo $t5 # [j][card]
+
+ 				lw $t6, hands($t5) # get current count at card
+
+    				addi $t6, $t6, 1 # current count ++
+
+    				sw $t6, hands($t5) # updare current count at card
+
     				addi $t3, $t3, 1 #j++
     				blt $t3, $a0, dealCardsLoopJ # j < numberOfPlayers
-    				
+
     			addi $t1, $t1, 1 #i++
     			blt $t1, $t2, dealCardsLoopI		#i < cardPerHand
-   	dealCardsEnd:
+   	    dealCardsEnd:
    		move $v0, $a3
     		lw $ra, 0($sp)
 		addi $sp, $sp, 4
     	jr $ra
-    	
-    	#Keyoni McNair
-    		printOptions: # void printOptions(int player) $a0 = player
-     			addi $sp, $sp -4 # saving addresson the stack
- 			sw $ra, 0($sp)
- 			jal clearAllTemps
- 			
-			move $t1, $a0 #$t1 = player
-		
-    			la $a0, playerHand #printf("*Player %d hand\n",player+1);
- 			li $v0, 4
-			syscall
-			
- 			addi $t2, $t1, 1 #Print Player Number
- 			move $a0, $t2
- 			li $v0, 1 
- 			syscall
-			
- 			addi $t3, $t3, 0 # int hasCardInHand = 0;
-			addi $t4, $t4, 0 #j = 0
- 			printOptionsLoopJ:  # for (int j = 0; j < 13; j++){
-   				mult $t1, $t9  #  hands[player][j]++; player * 13
-     				mflo $t5
-     				add $t5, $t5, $t4 # (player*13) + J
-    				
-     				mult $t8, $t5  # (player*13) + j * 4 for address
-    				
-  				mflo $t5 # [player][j]
-  				lw $t5, hands($t5)
- 				
-				ifHands:
-  					beqz $t5, printOptionsLoopJEnd #hands[player][j] != 0
-  					beq $t5, 4, printOptionsLoopJEnd #hands[player][j] != 4
- 					ifPairLimit:
- 					beq $s0, 4, cardHand #if pairLimit == 4 ||
-  			 		beq $t5, 2, printOptionsLoopJEnd #(hands[player][j] != 2 
-  			 		bne $s0, 2, printOptionsLoopJEnd #&& pairLimit == 2)
-  			 			cardHand: #printf("You have %d, %d's\n", hands[player][j], j);
-  			 			la $a0, youHave
-						li $v0, 4
-						syscall
-						
-						li $v0, 1  # Number of Cards
-						move $a0, $t5 
-						syscall
-						
-						la $a0, space
-						li $v0, 4
-						syscall
-						
-						li $v0, 1  # Card Number
-						move $a0, $t4 
-						syscall
-						
-						la $a0, s
-						li $v0, 4
-						syscall
-						
-						la $a0, lineBreak
-						li $v0, 4
-						syscall
-						
-						li $t3, 1 # cardInHand = 1
-						j  printOptionsLoopJEnd
-  			 		
-  			 printOptionsLoopJEnd:
-  			 	addi $t4, $t4, 1 #j++
-  			 	blt $t4, $t9, printOptionsLoopJ
-  			 
-   			beqz $t3, emptyHand #(!hasCardInHand)
-   			j askQuestion
-   			emptyHand:
-   			  	la $a0, onlyFish #printf("You can only fish, your hand is empty.\n");
-				li $v0, 4
-				syscall
-				j printOptionsEnd
-          
-          		askQuestion:
-                   		la $a0, turnAsk #printf("Which Player would you like to ask for which card in your hand? (Player Number, Card Number): \n");
-				li $v0, 4
-				syscall
 
-		printOptionsEnd:
-			lw $ra, 0($sp)
-			addi $sp, $sp, 4
-			jr $ra
-		
+    	#Keyoni McNair
+        printOptions: # void printOptions(int player) $a0 = player
+            addi $sp, $sp -4 # saving addresson the stack
+        sw $ra, 0($sp)
+        jal clearAllTemps
+
+        move $t1, $a0 #$t1 = player
+
+            la $a0, playerHand #printf("*Player %d hand\n",player+1);
+        li $v0, 4
+        syscall
+
+        addi $t2, $t1, 1 #Print Player Number
+        move $a0, $t2
+        li $v0, 1
+        syscall
+
+        addi $t3, $t3, 0 # int hasCardInHand = 0;
+        addi $t4, $t4, 0 #j = 0
+        printOptionsLoopJ:  # for (int j = 0; j < 13; j++){
+            mult $t1, $t9  #  hands[player][j]++; player * 13
+                mflo $t5
+                add $t5, $t5, $t4 # (player*13) + J
+
+                mult $t8, $t5  # (player*13) + j * 4 for address
+
+            mflo $t5 # [player][j]
+            lw $t5, hands($t5)
+
+            ifHands:
+                beqz $t5, printOptionsLoopJEnd #hands[player][j] != 0
+                beq $t5, 4, printOptionsLoopJEnd #hands[player][j] != 4
+                ifPairLimit:
+                beq $s0, 4, cardHand #if pairLimit == 4 ||
+                beq $t5, 2, printOptionsLoopJEnd #(hands[player][j] != 2
+                bne $s0, 2, printOptionsLoopJEnd #&& pairLimit == 2)
+                    cardHand: #printf("You have %d, %d's\n", hands[player][j], j);
+                    la $a0, youHave
+                    li $v0, 4
+                    syscall
+
+                    li $v0, 1  # Number of Cards
+                    move $a0, $t5
+                    syscall
+
+                    la $a0, space
+                    li $v0, 4
+                    syscall
+
+                    li $v0, 1  # Card Number
+                    move $a0, $t4
+                    syscall
+
+                    la $a0, s
+                    li $v0, 4
+                    syscall
+
+                    la $a0, lineBreak
+                    li $v0, 4
+                    syscall
+
+                    li $t3, 1 # cardInHand = 1
+                    j  printOptionsLoopJEnd
+
+         printOptionsLoopJEnd:
+            addi $t4, $t4, 1 #j++
+            blt $t4, $t9, printOptionsLoopJ
+
+        beqz $t3, emptyHand #(!hasCardInHand)
+        j askQuestion
+        emptyHand:
+            la $a0, onlyFish #printf("You can only fish, your hand is empty.\n");
+            li $v0, 4
+            syscall
+            j printOptionsEnd
+
+            askQuestion:
+                    la $a0, turnAsk #printf("Which Player would you like to ask for which card in your hand? (Player Number, Card Number): \n");
+            li $v0, 4
+            syscall
+
+    printOptionsEnd:
+        lw $ra, 0($sp)
+        addi $sp, $sp, 4
+        jr $ra
+
+    #Anthony Herrera
+	startGame:
+        lw $s0, pairLimit #loading in pairLimit to #s0
+        lw $s1, turnOrder #loading turnplayer
+        lw $s2, deckTop #loading deckTop
+        la $s3, numberOfPlayers # loading number of players
+        lw $s4, playerToAsk #loading to player to Ask
+        lw $s5, cardToAsk  #loading card to Ask
+
+            lw $t8, four
+            lw $t9, thirteen
+
+            la $a0, deck # deck to arugment 0
+
+            jal createDeck
+            jal clearAllTemps
+            move $v0,$s0 # moving deck to back to $s0
+
+            la $a0, seedAsk # to move to startGame - Ask for seed number
+            li $v0, 4
+            syscall
+
+
+
+            la $a3, deck #deck to arugment 3
+            jal shuffleDeck
+            jal clearAllTemps
+
+            move $a0, $v0
+
+            la $a0, playerAsk # to move to startGame - Ask for player number (2-4)
+            li $v0, 4
+            syscall
+
+            li $v0, 5 # user input playerSize
+            syscall
+
+            move $s3,$v0 # update playerSize
+
+            la $a3, deck # move deck to Arguemnt 3
+            move $a0,$s3 # move player size to arument 0
+
+            jal dealCards
+            jal clearAllTemps
+
+            move $a0, $zero
+            jal printOptions
+
+        while: #while !isFinished
+            jal isFinished
+            beq $v0, 1, end
+            while2: #while (turnOrder != playerSize)
+                beq $s1, $s3, end2
+
+                la $a0, playerTurn # "\nPlayer turn - "
+                li $v0, 4
+                syscall
+
+                addi $t0, $s1, 1
+                la $a0, $t0
+                li $v0, 1
+                syscall
+
+                jal turn
+                jal isFinished
+
+                beq $v0, 1, end
+
+                addi $s1, $s1, 1
+                j while2
+            end2:
+                move $s6, $zero
+                j while
+        end:
+
+    j exit
 
 	#Anthony Herrera
   	isEmpty: #Checks to see if the deckTop == DECKSIZE. If so, the deck is empty
 		lw $t0, deckTop
 		lw $t1, DECKSIZE
-		
+
 		seq $t2, $t0, $t1
-		
+
 		move $v0, $t2
 	jr $ra
 
@@ -455,7 +525,8 @@
         lw $ra, 0($sp)
         addi $sp, $sp, 4
         jr $ra
-    
+
+    #Keyoni McNair
 	clearAllTemps:
 		move $t0, $zero
 		move $t1, $zero
@@ -509,7 +580,63 @@
 
     endIsFinished:
     jr $ra
-    		
+
+    #Jeffrey Dobbek
+    endGame:
+    	jal printScores
+
+    	li $v0, 4
+    	la $a0, endGameText
+    	syscall
+    endEndGame:
+        jr $ra
+
+    #Jeffrey Dobbek
+    printScores:
+    	li $v0, 4
+    	la $a0, printing
+    	syscall
+
+    	li $t0, 4
+    	la $s0, numberOfPlayers
+    	sw $t0, ($s0)
+
+    	lw $t0, numberOfPlayers
+    	li $t1, 0
+    for:
+    	beq $t1, $t0, end
+
+    	li $v0, 4
+    	la $a0, playerText
+    	syscall
+
+    	li $v0, 1
+    	addi $a0, $v1, 1
+    	syscall
+
+    	li $v0, 4
+    	la $a0, scoreText
+    	syscall
+
+    	move $a0, $t1
+    	sll $a0, $a0, 2
+    	la $s1, score
+    	add $s1, $s1, $a0
+
+    	li $v0, 1
+    	lw $a0, 0($s1)
+    	syscall
+
+    	li $v0, 4
+    	la $a0, newLineText
+    	syscall
+
+    	addi $t1, $t1, 1
+    	j for
+    end:
+    	jr $ra
+    endPrintScores:
+    	jr $ra
         #int goFish (int player, int expCard) {
         #    if (isEmpty()) {
         #        printf("All fish is DEAD(deck is empty).\n");
@@ -739,59 +866,3 @@
 	exit:
 		li $v0, 10
 		syscall
-
-
-printScores:
-	li $v0, 4
-	la $a0, printing
-	syscall
-	
-	li $t0, 4
-	la $s0, numberOfPlayers
-	sw $t0, ($s0)
-	
-	lw $t0, numberOfPlayers
-	li $t1, 0
-for:
-	beq $t1, $t0, end
-	
-	li $v0, 4
-	la $a0, playerText
-	syscall
-	
-	li $v0, 1
-	addi $a0, $v1, 1
-	syscall
-	
-	li $v0, 4
-	la $a0, scoreText
-	syscall
-	
-	move $a0, $t1
-	sll $a0, $a0, 2
-	la $s1, score
-	add $s1, $s1, $a0
-	
-	li $v0, 1
-	lw $a0, 0($s1)
-	syscall
-	
-	li $v0, 4
-	la $a0, newLineText
-	syscall
-	
-	addi $t1, $t1, 1
-	j for
-end:
-	jr $ra
-endPrintScores:
-
-
-
-endGame:
-	jal printScores
-	
-	li $v0, 4
-	la $a0, endGameText
-	syscall
-endEndGame:
