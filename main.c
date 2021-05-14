@@ -244,7 +244,7 @@ int isFinished() {
     for (int i = 0; i < numberOfPlayers; i++) {
         countTotalScores+=scores[i];
     }
-    if ((countTotalScores == 13 && pairLimit == 4) || (countTotalScores == 26 && pairLimit == 2)) {
+    if ((countTotalScores == 13 && pairLimit == 4) || (countTotalScores == 5 && pairLimit == 2)) {
         return 1;
     } else {
         return 0;

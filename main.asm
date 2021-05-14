@@ -36,6 +36,7 @@
 	successFish: .asciiz "You got the card you asked for, in your nasty hands!\n"
 	turnAsk: .asciiz "Which Player would you like to ask for which card in your hand? (Player Number, Card Number): \n"
 	youHave: .asciiz "You have " #print number at index and index after this
+	youGot: .asciiz "You got " #print number at index and index after this
 .text
 	main:
 	jal startGame
@@ -359,6 +360,8 @@
             
             lw $t5, hands($t6) # card value #   if (hands[player][j] == pairLimit) {
             bne $t5, $s0,updateScoreLoopJEnd
+            mult $t1, $t8  # player * 4
+            mflo $t3
             sub $t5, $t5, $s0
             
             sw $t5, hands($t6) #    hands[player][j]-=pairLimit;
@@ -379,7 +382,7 @@
         lw $s0, pairLimit #loading in pairLimit to #s0
         lw $s1, turnOrder #loading turnplayer
         lw $s2, deckTop #loading deckTop
-        la $s3, numberOfPlayers # loading number of players
+        lw $s3, numberOfPlayers # loading number of players
         lw $s4, playerToAsk #loading to player to Ask
         lw $s5, cardToAsk  #loading card to Ask
 
@@ -419,6 +422,19 @@
             jal dealCards
             jal clearAllTemps
 
+
+	#for (int i = 0; i < numberOfPlayers; i++){
+	#        updateScores(i);
+	#}
+	    li $t0, 0
+	    updateAllScores:
+	    bge $t0, $s3, endUpdateAllScores
+	    	move $s1, $t0
+	    	jal updateScores
+	    addi $t0, $t0, 1
+	    endUpdateAllScores:
+	    li $s1, 0
+	    
         whileNotisFinished: #while !isFinished
             jal isFinished
             beq $v0, 1, end
@@ -470,7 +486,7 @@
         lw $t4, hands($t0)
             move $v0, $t4
         #if(hands[targetPlayer][card] > 0); if $v0 > 0 return 1, else 0.
-           seq $v0, $zero, $v0
+           sne $v0, $zero, $v0
 
         lw $ra, 0($sp)
         addi $sp, $sp, 4
@@ -491,21 +507,18 @@
 	#Jeffrey Dobbek
 	isFinished:
     	li $t0, 0 #int countTotalScores = 0
-    	lw $t2, numberOfPlayers #stores numberOfPlayers
+    	move $t2, $s3 #stores numberOfPlayers
     	la $t3, scores #stores scores
-    	la $t4, pairLimit #stores pairLimit
+    	move $t4, $s0 #stores pairLimit
     	li $t1, 0 #int i = 0
 
 
     	for:
     		bge $t1, $t2, endFor #i < numberOfPlayers
-    		li $t5, 4
-    		mult $t1, $t5
+    		mult $t1, $t8
     		mflo $t6
     		lw $t7, scores($t6)
     		add $t0, $t0, $t7 #countTotalScores +=scores[i]
-    		move $a0, $t0
-    		jal printInt
     		addi $t1, $t1, 1 #i++
     		j for
     	endFor:
@@ -517,16 +530,17 @@
     	j endFour
     	thenFour:
     	li $v0, 1 #return 1
+    	j endIsFinished
     	endFour:
-
-    	beq $t0, 26, andTwo #if(countTotalScores == 26)
+    	beq $t0, 5, andTwo #if(countTotalScores == 26)     # CHANGE THIS TO 26
+    	li $v0, 0
+    	j endIsFinished
     	andTwo:
     	beq $t4, 2, thenTwo #&& pairLimit == 2
     	li $v0, 0 #return 0
-    	j endTwo
+    	j endIsFinished
     	thenTwo:
     	li $v0, 1 #return 1
-    	endTwo:
 
     endIsFinished:
     jr $ra
@@ -534,12 +548,10 @@
     #Jeffrey Dobbek
     endGame:
     	jal printScores
-
-    	li $v0, 4
     	la $a0, endGameText
+    	li $v0, 4
     	syscall
-    endEndGame:
-        jr $ra
+    jr $ra
 
     #Jeffrey Dobbek
     printScores:
@@ -635,7 +647,7 @@
 
                 sw $t3, hands($t2)
 
-    			la $a0, youHave #print you have...
+    			la $a0, youGot #print you have...
     			jal printStr
     			move $a0, $t5 #print card number recieved
     			jal printInt
@@ -751,39 +763,40 @@
         jal updateScores
         jal printOptions
 
-        jal inputInt
+        jal inputInt # input playerToAsk s4
         move $s4, $v0
-        jal inputInt
+        jal inputInt # input cardToAsk s5
         move $s5, $v0
         subi $s4, $s4, 1
 
-        beq $s1, $s4, elseSelfAsk
+        beq $s1, $s4, elseSelfAsk #asking yourself?
             jal cardInHand
-            bne $v0, 1, elseGoFish
+            bne $v0, 1, elseGoFish #found the card in player hand
                 jal moveCards
                 jal isFinished
-                bne $v0, 1, notFinished1
+                bne $v0, 1, notFinished1 #game finished
                     jal endGame
-                notFinished1:
+                notFinished1: #game not finished
                     jal turn
                     jal clearAllTemps
                     j finishTurn
-            elseGoFish:
+            elseGoFish: #did not find the card in player hand
                 jal goFish
-                bne $v0, 1, badFish
+                bne $v0, 1, badFish #found the card in deck
                     jal isFinished
-                    bne $v0, 1, notFinished2
+                    bne $v0, 1, notFinished2 #game finished
                         jal endGame
-                    notFinished2:
+                    notFinished2: #game not finished
                         jal turn
                         jal clearAllTemps
                         j finishTurn
-                badFish:
+                badFish: #did not find the card in deck
                     j finishTurn
 
         elseSelfAsk:
             la $a0, cannotFishSelf
             jal printStr
+            jal turn
 
         finishTurn:
         lw $ra, 0($sp)
