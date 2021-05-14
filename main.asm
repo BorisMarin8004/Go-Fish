@@ -381,10 +381,9 @@
         	jal printOptions
         	 
 		li $s6, 0 #turnOrder = 0
-		move $s7, $a0 #move player size to $s7
 		
 		while: #while (turnOrder != playerSize)
-			beq $s6, $s7, end
+			beq $s6, $s3, end
 			
 			la $a0, playerTurn # "\nPlayer turn - "
 			li $v0, 4
