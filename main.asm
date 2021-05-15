@@ -1,6 +1,5 @@
 #Insert Header Here
 .data
-
     DECKSIZE: .word 52 #const int DECK_SIZE = 52;
     cardToAsk: .word 0
     deck: .space 208 #int deck[DECK_SIZE]; 52* 4 bytes
@@ -39,7 +38,7 @@
     youGot: .asciiz "You got " #print number at index and index after this
 .text
     main:
-    jal startGame
+        jal startGame
 
     #Boris Marin
     printStr:
@@ -65,148 +64,83 @@
         move $v1, $a0
     jr $ra
 
-    #Boris Marin
-    getHandsCardValue:
-        addi $sp, $sp -4
-        sw $ra, 0($sp)
-        jal clearAllTemps
-
-        move $t0, $a0 #playerIndex
-        move $t1, $a1 #cardIndex
-
-        mult $t0, $t9
-        mflo $t0
-
-        add $t2, $t0, $t1
-
-        mult $t2, $t8
-        mflo $t2
-
-        lw $t0, hands($t2)
-        move $v0, $t0
-        lw $ra, 0($sp)
-        addi $sp, $sp, 4
-    jr $ra
-
-    #Boris Marin
-    setHandsCardValue:
-        addi $sp, $sp -4
-        sw $ra, 0($sp)
-        jal clearAllTemps
-
-        move $t0, $a0 #playerIndex
-        move $t1, $a1 #cardIndex
-        move $t4, $a2 #cardValue
-
-        mult $t0, $t9
-        mflo $t0
-
-        add $t2, $t0, $t1
-
-        mult $t2, $t8
-        mflo $t2
-
-        sw $t4, hands($t2)
-
-        lw $ra, 0($sp)
-        addi $sp, $sp, 4
-    jr $ra
-
     #Keyoni McNair
     createDeck: #void createDeck() { $a0 = deck
         li $t1, 52 #deck size
-            li $t2, 13 # 13
-            li $t4, 0 # counter for j int j = 0
-            whileDeck:
-                div $t4, $t2 #j % 13;
-                mfhi $t5
-                #   while (j < 52)  {
-                sw $t5, 0($a0)  #  deck[j] = j % 13;
+        li $t2, 13 # 13
+        li $t4, 0 # counter for j int j = 0
+        whileDeck:
+            div $t4, $t2 #j % 13;
+            mfhi $t5
+            #   while (j < 52)  {
+            sw $t5, 0($a0)  #  deck[j] = j % 13;
 
-                addi $a0, $a0, 4 # moves deck index
+            addi $a0, $a0, 4 # moves deck index
             addi $t4,$t4,1  #j++
 
-                blt $t4,$t1, whileDeck # while (j < 52)
+            blt $t4,$t1, whileDeck # while (j < 52)
         endWhile:
-        jr $ra
-        #Keyoni McNair
-        shuffleDeck: #void shuffleDeck() { $a3 = deck
-            addi $sp, $sp -4 # saving addresson the stack
+    jr $ra
+
+    #Keyoni McNair
+    shuffleDeck: #void shuffleDeck() { $a3 = deck
+        addi $sp, $sp -4 # saving addresson the stack
         sw $ra, 0($sp)
 
         move $t7, $a3 # start pointer of deck is at $t7
         addi $t6, $zero, 4
 
-            li $v0, 5 # user input seed number
+        li $v0, 5 # user input seed number
         syscall
 
-            move $t0, $v0 #shuffle number = $t0
+        move $t0, $v0 #shuffle number = $t0
 
-            mult $t1, $zero # clear $t1
-            mflo $t1 # $t1 = 0
+        mult $t1, $zero # clear $t1
+        mflo $t1 # $t1 = 0
+        addi $t1, $t1, 51 # $t1 = int  i = DECK_SIZE-1;
 
-            addi $t1, $t1, 51 # $t1 = int  i = DECK_SIZE-1;
+        shuffleLoop:  # for (int i = DECK_SIZE-1; i > 0; i--){
+            move $t2, $zero # clear $t2
+            move $t4, $zero # clear $t4
+            move $t5, $zero # clear $t5
 
-
-
-            shuffleLoop:  # for (int i = DECK_SIZE-1; i > 0; i--){
-
-                move $t2, $zero # clear $t2
-                move $t4, $zero # clear $t4
-                move $t5, $zero # clear $t5
-
-                add $t5, $t5, $t1 # $t5 = 51
-
-                mult $t5, $t6 # $t5 = i *4 for memory
-                mflo $t5
-
-
+            add $t5, $t5, $t1 # $t5 = 51
+            mult $t5, $t6 # $t5 = i *4 for memory
+            mflo $t5
             addi $t2, $t1, 1  #    int j = shuffleNumber % (i+1);  # $t2 = (i+1)
-                div $t0, $t2
-                mfhi $t2 # $t2 = j
+            div $t0, $t2
+            mfhi $t2 # $t2 = j
+            mult $t2, $t6 # $t2 = j * 4 for memory
+            mflo $t2
 
-                mult $t2, $t6 # $t2 = j * 4 for memory
-                mflo $t2
-
-                lw $t4, deck($t5) #deck[i]
-
-                #move $a0, $a3 # moving deck[i] to $a0
-                move $a0, $t4
-
-                lw $t4, deck($t2)
-
-                move $a1, $t4
+            lw $t4, deck($t5) #deck[i]
+            #move $a0, $a3 # moving deck[i] to $a0
+            move $a0, $t4
+            lw $t4, deck($t2)
+            move $a1, $t4
 
             jal swap #    swap(&deck[i], &deck[j]); swap ($a0, $a1) => $v0 = $a1 $v1= $a0
 
-                sw $v1, deck($t2) # putting what was in deck[i] in deck[j]
-
-                sw $v0, deck($t5) # putting what was in deck[j] in deck[i]
-
+            sw $v1, deck($t2) # putting what was in deck[i] in deck[j]
+            sw $v0, deck($t5) # putting what was in deck[j] in deck[i]
             subi $t1, $t1, 1 # i--
             bgtz $t1, shuffleLoop  # i > 0
-
         shuffleLoopEnd:
-
-         #  for(int i = 0; i < DECK_SIZE; i++) {
-         #      printf("*(deck + [%d]) : %d\n", i, *(deck + i) );
-
+        #  for(int i = 0; i < DECK_SIZE; i++) {
+        #      printf("*(deck + [%d]) : %d\n", i, *(deck + i) );
         shuffleDeckEnd:
             move $v0, $a3
             lw $ra, 0($sp)
-        addi $sp, $sp, 4
+            addi $sp, $sp, 4
     jr $ra
 
     #Keyoni McNair
     draw: #int draw () {
         mult $s2, $t8 #decktop * 4
-            mflo $t7
-
+        mflo $t7
         lw $t7, deck($t7)     #int card = deck[deckTop]; $t7 = deck[deckTop[
-            addi $s2, $s2, 1  # deckTop = deckTop + 1;
-
+        addi $s2, $s2, 1  # deckTop = deckTop + 1;
         move $v0,$t7  # return card;
-
     jr $ra
 
     #Keyoni McNair
@@ -218,41 +152,40 @@
         addi $t2, $t2, 5 # $t2 = cardPerHand = 5
 
         dealCardsLoopI: #for(int i = 0; i < cardPerHand; i++){
-        move $t3, $zero #j = 0
+            move $t3, $zero #j = 0
 
-                dealCardsLoopJ: #    for(int j = 0; j < numberOfPlayers; j++){
-                    jal draw #        int card = draw(deck, deckTop); $v0 = card
-                    move $t4, $v0 #move cardnumber to $t4
+            dealCardsLoopJ: #    for(int j = 0; j < numberOfPlayers; j++){
+                jal draw #        int card = draw(deck, deckTop); $v0 = card
+                move $t4, $v0 #move cardnumber to $t4
 
+                mult $t3, $t9  #  hands[j][card]++; player * 13
+                mflo $t5
+                add $t5, $t5, $t4 # (player*13) + card
 
-                    mult $t3, $t9  #  hands[j][card]++; player * 13
-                    mflo $t5
-                    add $t5, $t5, $t4 # (player*13) + card
-
-                    mult $t8, $t5  # (player*13) + card * 4 for address
+                mult $t8, $t5  # (player*13) + card * 4 for address
 
                 mflo $t5 # [j][card]
 
                 lw $t6, hands($t5) # get current count at card
 
-                    addi $t6, $t6, 1 # current count ++
+                addi $t6, $t6, 1 # current count ++
 
-                    sw $t6, hands($t5) # updare current count at card
+                sw $t6, hands($t5) # updare current count at card
 
-                    addi $t3, $t3, 1 #j++
-                    blt $t3, $a0, dealCardsLoopJ # j < numberOfPlayers
+                addi $t3, $t3, 1 #j++
+                blt $t3, $a0, dealCardsLoopJ # j < numberOfPlayers
 
                 addi $t1, $t1, 1 #i++
                 blt $t1, $t2, dealCardsLoopI        #i < cardPerHand
         dealCardsEnd:
-        move $v0, $a3
+            move $v0, $a3
             lw $ra, 0($sp)
-        addi $sp, $sp, 4
-        jr $ra
+            addi $sp, $sp, 4
+    jr $ra
 
-        #Keyoni McNair
-        printOptions: # void printOptions(int player) $a0 = player
-            addi $sp, $sp -4 # saving addresson the stack
+    #Keyoni McNair
+    printOptions: # void printOptions(int player) $a0 = player
+        addi $sp, $sp -4 # saving addresson the stack
         sw $ra, 0($sp)
         jal clearAllTemps
 
@@ -266,20 +199,19 @@
         move $a0, $t2
         li $v0, 1
         syscall
-        
+
         la $a0, lineBreak
         li $v0, 4
         syscall
-
 
         addi $t3, $t3, 0 # int hasCardInHand = 0;
         addi $t4, $t4, 0 #j = 0
         printOptionsLoopJ:  # for (int j = 0; j < 13; j++){
             mult $t1, $t9  #  hands[player][j]++; player * 13
-                mflo $t5
-                add $t5, $t5, $t4 # (player*13) + J
+            mflo $t5
+            add $t5, $t5, $t4 # (player*13) + J
 
-                mult $t8, $t5  # (player*13) + j * 4 for address
+            mult $t8, $t5  # (player*13) + j * 4 for address
 
             mflo $t5 # [player][j]
             lw $t5, hands($t5)
@@ -287,42 +219,41 @@
             ifHands:
                 beqz $t5, printOptionsLoopJEnd #hands[player][j] != 0
                 beq $t5, 4, printOptionsLoopJEnd #hands[player][j] != 4
-                ifPairLimit:
+            ifPairLimit:
                 beq $s0, 4, cardHand #if pairLimit == 4 ||
                 beq $t5, 2, printOptionsLoopJEnd #(hands[player][j] != 2
                 bne $s0, 2, printOptionsLoopJEnd #&& pairLimit == 2)
-                    cardHand: #printf("You have %d, %d's\n", hands[player][j], j);
-                   
-                    la $a0, youHave
-                    li $v0, 4
-                    syscall
+            cardHand: #printf("You have %d, %d's\n", hands[player][j], j);
 
-                    li $v0, 1  # Number of Cards
-                    move $a0, $t5
-                    syscall
+                la $a0, youHave
+                li $v0, 4
+                syscall
 
-                    la $a0, space
-                    li $v0, 4
-                    syscall
+                li $v0, 1  # Number of Cards
+                move $a0, $t5
+                syscall
 
-                    li $v0, 1  # Card Number
-                    move $a0, $t4
-                    syscall
+                la $a0, space
+                li $v0, 4
+                syscall
 
-                    la $a0, s
-                    li $v0, 4
-                    syscall
+                li $v0, 1  # Card Number
+                move $a0, $t4
+                syscall
 
-                    la $a0, lineBreak
-                    li $v0, 4
-                    syscall
+                la $a0, s
+                li $v0, 4
+                syscall
 
-                    li $t3, 1 # cardInHand = 1
-                    j  printOptionsLoopJEnd
+                la $a0, lineBreak
+                li $v0, 4
+                syscall
 
-         printOptionsLoopJEnd:
-            addi $t4, $t4, 1 #j++
-            blt $t4, $t9, printOptionsLoopJ
+                li $t3, 1 # cardInHand = 1
+                j  printOptionsLoopJEnd
+                printOptionsLoopJEnd:
+                addi $t4, $t4, 1 #j++
+        blt $t4, $t9, printOptionsLoopJ
 
         beqz $t3, emptyHand #(!hasCardInHand)
         j askQuestion
@@ -333,48 +264,48 @@
             j goFish
             j printOptionsEnd
 
-            askQuestion:
-                    la $a0, turnAsk #printf("Which Player would you like to ask for which card in your hand? (Player Number, Card Number): \n");
+        askQuestion:
+            la $a0, turnAsk #printf("Which Player would you like to ask for which card in your hand? (Player Number, Card Number): \n");
             li $v0, 4
             syscall
 
-    printOptionsEnd:
-        lw $ra, 0($sp)
-        addi $sp, $sp, 4
-        jr $ra
+        printOptionsEnd:
+            lw $ra, 0($sp)
+            addi $sp, $sp, 4
+    jr $ra
 
     #Keyoni McNair
     updateScores:   #void updateScores(int player){ $s4 = playerIndex
         addi $sp, $sp -4 # saving addresson the stack
         sw $ra, 0($sp)
         jal clearAllTemps
-        
-        move $t1, $s1 # for (int j = 0; j < 13; j++){ 
-            move $t2, $zero #j = 0
-            
-            updateScoreLoopJ:   #   if (hands[player][j] == pairLimit) {
-                mult $t1, $t9  #  hands[player][j]++; player * 13
-                mflo $t3 # $t3 = player*13
-                add $t4, $t3, $t2 # (player*13) + J
-                mult $t4, $t8  # (player*13) + j * 4 for address
+
+        move $t1, $s1 # for (int j = 0; j < 13; j++){
+        move $t2, $zero #j = 0
+
+        updateScoreLoopJ:   #   if (hands[player][j] == pairLimit) {
+            mult $t1, $t9  #  hands[player][j]++; player * 13
+            mflo $t3 # $t3 = player*13
+            add $t4, $t3, $t2 # (player*13) + J
+            mult $t4, $t8  # (player*13) + j * 4 for address
             mflo $t6 # [player][j]
-            
+
             lw $t5, hands($t6) # card value #   if (hands[player][j] == pairLimit) {
             bne $t5, $s0,updateScoreLoopJEnd
             mult $t1, $t8  # player * 4
             mflo $t3
-            
+
             sub $t5, $t5, $s0
-            
+
             sw $t5, hands($t6) #    hands[player][j]-=pairLimit;
             lw $t6, scores($t3) #      scores[player]++;
             addi $t6, $t6, 1
             sw $t6, scores($t3)
-            
+
             updateScoreLoopJEnd:
             addi $t2, $t2, 1 #j++
-            blt $t2, $t9, updateScoreLoopJ
-            
+        blt $t2, $t9, updateScoreLoopJ
+
         lw $ra, 0($sp)
         addi $sp, $sp, 4
     jr $ra
@@ -387,65 +318,58 @@
         lw $s3, numberOfPlayers # loading number of players
         lw $s4, playerToAsk #loading to player to Ask
         lw $s5, cardToAsk  #loading card to Ask
+        lw $t8, four
+        lw $t9, thirteen
+        la $a0, deck # deck to arugment 0
 
-            lw $t8, four
-            lw $t9, thirteen
-
-            la $a0, deck # deck to arugment 0
-
-            jal createDeck
-            jal clearAllTemps
-            move $v0,$s0 # moving deck to back to $s0
+        jal createDeck
+        jal clearAllTemps
+        move $v0,$s0 # moving deck to back to $s0
 
         la $a0, pairAsk # Ask for pair number
-            li $v0, 4
-            syscall
-            
-            li $v0, 5 # user input pairAsk
-            syscall
-            
-            move $s0, $v0 #move pairLimit into save 
+        li $v0, 4
+        syscall
 
+        li $v0, 5 # user input pairAsk
+        syscall
 
-            la $a0, seedAsk # Ask for seed number
-            li $v0, 4
-            syscall
+        move $s0, $v0 #move pairLimit into save
 
-            la $a3, deck #deck to arugment 3
-            jal shuffleDeck
-            jal clearAllTemps
+        la $a0, seedAsk # Ask for seed number
+        li $v0, 4
+        syscall
 
-            move $a0, $v0
+        la $a3, deck #deck to arugment 3
+        jal shuffleDeck
+        jal clearAllTemps
+        move $a0, $v0
 
-            la $a0, playerAsk # Ask for player number (2-4)
-            li $v0, 4
-            syscall
+        la $a0, playerAsk # Ask for player number (2-4)
+        li $v0, 4
+        syscall
 
-            li $v0, 5 # user input playerSize
-            syscall
+        li $v0, 5 # user input playerSize
+        syscall
 
-            move $s3,$v0 # update playerSize
+        move $s3,$v0 # update playerSize
 
-            la $a3, deck # move deck to Arguemnt 3
-            move $a0,$s3 # move player size to arument 0
+        la $a3, deck # move deck to Arguemnt 3
+        move $a0,$s3 # move player size to arument 0
 
-            jal dealCards
-            jal clearAllTemps
-
-
-    #for (int i = 0; i < numberOfPlayers; i++){
-    #        updateScores(i);
-    #}
-      
+        jal dealCards
+        jal clearAllTemps
+        #for (int i = 0; i < numberOfPlayers; i++){
+        #        updateScores(i);
+        #}
         updateAllScores:
-        bge $s1, $s3, endUpdateAllScores
+            bge $s1, $s3, endUpdateAllScores
             jal updateScores
-        addi $s1, $s1, 1
-        j updateAllScores
+            addi $s1, $s1, 1
+            j updateAllScores
         endUpdateAllScores:
         li $s1, 0
-      
-        
+
+
         whileNotisFinished: #while !isFinished
             jal isFinished
             beq $v0, 1, end
@@ -461,18 +385,17 @@
                 li $v0, 1
                 syscall
 
-                jal turn 
+                jal turn
                 jal isFinished
                 beq $v0, 1, end
 
                 addi $s1, $s1, 1
                 j whileRound
             endRound:
-                move $s1, $zero
-                j whileNotisFinished
-        end: 
-        jal endGame 
-
+            move $s1, $zero
+            j whileNotisFinished
+        end:
+        jal endGame
     j exit
 
     #Anthony Herrera
@@ -495,13 +418,13 @@
         mult $t0, $t8 # (Player * 13 + card) * 4
         mflo $t0
         lw $t4, hands($t0)
-            move $v0, $t4
+        move $v0, $t4
         #if(hands[targetPlayer][card] > 0); if $v0 > 0 return 1, else 0.
-           sne $v0, $zero, $v0
+        sne $v0, $zero, $v0
 
         lw $ra, 0($sp)
         addi $sp, $sp, 4
-        jr $ra
+    jr $ra
 
     #Keyoni McNair
     clearAllTemps:
@@ -565,200 +488,196 @@
     j exit
 
     #Jeffrey Dobbek
-    printScores:  # void printScores(){ 
-    
+    printScores:  # void printScores(){
+
         li $v0, 4 #printf("----Printing Scores----\n");
         la $a0, printing
         syscall
 
         li $t1, 0
-        
-    forPrintScores:
-        bge $t1, $s3, endPrintScoresLoop #for (int i = 0; i < numberOfPlayers; i++){ 
 
-        li $v0, 4  # printf("*Player %d score:
-        la $a0, playerText
-        syscall
+        forPrintScores:
+            bge $t1, $s3, endPrintScoresLoop #for (int i = 0; i < numberOfPlayers; i++){
 
-        li $v0, 1   #print playing number
-        addi $a0, $t1, 1
-        syscall
+            li $v0, 4  # printf("*Player %d score:
+            la $a0, playerText
+            syscall
 
-        li $v0, 4  # print "scores"
-        la $a0, scoreText
-        syscall
+            li $v0, 1   #print playing number
+            addi $a0, $t1, 1
+            syscall
 
-        move $t2, $t1
-        sll $t2, $t2, 2
-        lw $t3, scores($t2)
-        #add $s1, $s1, $a0
+            li $v0, 4  # print "scores"
+            la $a0, scoreText
+            syscall
 
-        li $v0, 1 #print score number
-        move $a0, $t3
-        syscall
+            move $t2, $t1
+            sll $t2, $t2, 2
+            lw $t3, scores($t2)
+            #add $s1, $s1, $a0
 
-        li $v0, 4
-        la $a0, lineBreak
-        syscall
+            li $v0, 1 #print score number
+            move $a0, $t3
+            syscall
 
-        addi $t1, $t1, 1
-        j forPrintScores
-    endPrintScoresLoop:
-        jr $ra
-        #int goFish (int player, int expCard) {
-        #    if (isEmpty()) {
-        #        printf("All fish is DEAD(deck is empty).\n");
-        #        return 0;
-        #    } else {
-        #        printf("You are fishing(email) now. (Bad hacker stuff)\n");
-        #        int card = draw(deck, deckTop);
-        #        hands[player][card]++;
-        #        printf("You got: %d\n", card);
-        #        return expCard == card;
-        #    }
-        #}
-        #Boris Marin
-        goFish: #targetPlayer #cardToAsk
-            addi $sp, $sp -4
-            sw $ra, 0($sp)
-            jal clearAllTemps
+            li $v0, 4
+            la $a0, lineBreak
+            syscall
 
-            move $t0, $s1 #targetPlayer
-            move $t1, $s5 #cardToAsk
+            addi $t1, $t1, 1
+            j forPrintScores
+        endPrintScoresLoop:
+    jr $ra
+    #int goFish (int player, int expCard) {
+    #    if (isEmpty()) {
+    #        printf("All fish is DEAD(deck is empty).\n");
+    #        return 0;
+    #    } else {
+    #        printf("You are fishing(email) now. (Bad hacker stuff)\n");
+    #        int card = draw(deck, deckTop);
+    #        hands[player][card]++;
+    #        printf("You got: %d\n", card);
+    #        return expCard == card;
+    #    }
+    #}
+    #Boris Marin
+    goFish: #targetPlayer #cardToAsk
+        addi $sp, $sp -4
+        sw $ra, 0($sp)
+        jal clearAllTemps
 
-            jal isEmpty
-            bne $v0, 1, else1
-            if1:
-                la $a0, deckEmpty #print deck is empty
-                jal printStr
-                li $v0, 0
-                j endIf1
-            else1:
-                la $a0, goFishText # print go fish!
-                jal printStr
+        move $t0, $s1 #targetPlayer
+        move $t1, $s5 #cardToAsk
 
-                jal draw
-                move $t5, $v0 # t2 is cardIndex
-
-                move $t0, $s1 #playerIndex
-                move $t1, $t5 #cardIndex
-                mult $t0, $t9 # player * 13
-                mflo $t0
-                add $t2, $t0, $t1 #player * 13 + card
-                mult $t2, $t8 #(player * 13 + card) * 4 for memory
-                mflo $t2
-                lw $t3, hands($t2)
-
-                addi $t3, $t3, 1
-
-                sw $t3, hands($t2)
-
-                la $a0, youGot #print you have...
-                jal printStr
-                move $a0, $t5 #print card number recieved
-                jal printInt
-
-                seq $t3, $t5, $s5
-                move $v0, $t3
-                j endIf1
-            endIf1:
-
-            lw $ra, 0($sp)
-            addi $sp, $sp, 4
-        jr $ra
-
-        #void moveCards(int srcPlayer, int targetPlayer, int card){
-            #   printf("You got the card you asked for, in your nasty hands!\n");
-            #   while(cardInHand(srcPlayer, card)) {
-            #       hands[srcPlayer][card]--;
-            #       hands[targetPlayer][card]++;
-            #   }
-        #}
-        #Boris Marin
-        moveCards: #srcPlayer, targetPlayer, card
-            addi $sp, $sp -4
-            sw $ra, 0($sp)
-            jal clearAllTemps
-
-            move $t0, $s4 #srcPlayer
-            move $t1, $s1 #targetPlayer
-            move $t2, $s5 #cardIndex
-
-            la $a0, successFish # print "You got the card you asked for.."
+        jal isEmpty
+        bne $v0, 1, else1
+        if1: #deck empty??
+            la $a0, deckEmpty #print deck is empty
+            jal printStr
+            li $v0, 0
+            j endIf1
+        else1:
+            la $a0, goFishText # print go fish!
             jal printStr
 
-            whileCardInHand:
-                
-                jal cardInHand
-                bne $v0, 1, endWhileCardInHand
+            jal draw
+            move $t5, $v0 # t2 is cardIndex
 
-                #       hands[srcPlayer][card]--;
-                move $t0, $s4 #playerIndex
-                move $t1, $s5 #cardIndex
-                mult $t0, $t9 # player * 13
-                mflo $t0
-                add $t2, $t0, $t1 #(player * 13) + card
-                mult $t2, $t8
-                mflo $t2    #((player * 13) + card) * 4
-                lw $t0, hands($t2)
+            move $t0, $s1 #playerIndex
+            move $t1, $t5 #cardIndex
+            mult $t0, $t9 # player * 13
+            mflo $t0
+            add $t2, $t0, $t1 #player * 13 + card
+            mult $t2, $t8 #(player * 13 + card) * 4 for memory
+            mflo $t2
+            lw $t3, hands($t2)
+
+            addi $t3, $t3, 1
+
+            sw $t3, hands($t2)
+
+            la $a0, youGot #print you have...
+            jal printStr
+            move $a0, $t5 #print card number recieved
+            jal printInt
+
+            seq $t3, $t5, $s5
+            move $v0, $t3
+            j endIf1
+        endIf1:
+
+        lw $ra, 0($sp)
+        addi $sp, $sp, 4
+    jr $ra
+
+    #void moveCards(int srcPlayer, int targetPlayer, int card){
+    #   printf("You got the card you asked for, in your nasty hands!\n");
+    #   while(cardInHand(srcPlayer, card)) {
+    #       hands[srcPlayer][card]--;
+    #       hands[targetPlayer][card]++;
+    #   }
+    #}
+    #Boris Marin
+    moveCards: #srcPlayer, targetPlayer, card
+        addi $sp, $sp -4
+        sw $ra, 0($sp)
+        jal clearAllTemps
+
+        move $t0, $s4 #srcPlayer
+        move $t1, $s1 #targetPlayer
+        move $t2, $s5 #cardIndex
+
+        la $a0, successFish # print "You got the card you asked for.."
+        jal printStr
+
+        whileCardInHand:
+            jal cardInHand
+            bne $v0, 1, endWhileCardInHand
+
+            #hands[srcPlayer][card]--;
+            move $t0, $s4 #playerIndex
+            move $t1, $s5 #cardIndex
+            mult $t0, $t9 # player * 13
+            mflo $t0
+            add $t2, $t0, $t1 #(player * 13) + card
+            mult $t2, $t8
+            mflo $t2    #((player * 13) + card) * 4
+            lw $t0, hands($t2)
 
             subi $t0, $t0, 1 #cardValue
-                
-                sw $t0, hands($t2)
 
+            sw $t0, hands($t2)
 
-                #   hands[targetPlayer][card]++;
-                move $t0, $s1 #playerIndex
-                move $t1, $s5 #cardIndex
-                mult $t0, $t9
-                mflo $t0
-                add $t2, $t0, $t1
-                mult $t2, $t8
-                mflo $t2
-                lw $t0, hands($t2)
+            #hands[targetPlayer][card]++;
+            move $t0, $s1 #playerIndex
+            move $t1, $s5 #cardIndex
+            mult $t0, $t9
+            mflo $t0
+            add $t2, $t0, $t1
+            mult $t2, $t8
+            mflo $t2
+            lw $t0, hands($t2)
 
             addi $t0, $t0, 1
+            sw $t0, hands($t2)
+            j whileCardInHand
+        endWhileCardInHand:
 
-                sw $t0, hands($t2)
-
-             j whileCardInHand
-            endWhileCardInHand:
-
-            lw $ra, 0($sp)
-            addi $sp, $sp, 4
-        jr $ra
+        lw $ra, 0($sp)
+        addi $sp, $sp, 4
+    jr $ra
 
 
-#void turn(int targetPlayer){
-#    updateScores(targetPlayer);
-#    printOptions(targetPlayer);
-#    int playerToAsk;
-#    int cardToAsk;
-#    scanf("%d", &playerToAsk);
-#    scanf("%d", &cardToAsk);
-#    playerToAsk--;
-#    if (targetPlayer != playerToAsk){
-#        if (cardInHand(playerToAsk, cardToAsk)){
-#            moveCards(playerToAsk, targetPlayer, cardToAsk);
-#            if (isFinished()){
-#                endGame();
-#            }
-#            turn(targetPlayer);
-#        } else {
-#            if (goFish(targetPlayer, cardToAsk)){
-#                if (isFinished()){
-#                    endGame();
-#                }
-#                turn(targetPlayer);
-#            } else {
-#                return;
-#            }
-#        }
-#    } else {
-#        printf("Sorry, cannot choose yourself ya'\n");
-#        turn(targetPlayer);
-#    }
-#}
+    #void turn(int targetPlayer){
+    #    updateScores(targetPlayer);
+    #    printOptions(targetPlayer);
+    #    int playerToAsk;
+    #    int cardToAsk;
+    #    scanf("%d", &playerToAsk);
+    #    scanf("%d", &cardToAsk);
+    #    playerToAsk--;
+    #    if (targetPlayer != playerToAsk){
+    #        if (cardInHand(playerToAsk, cardToAsk)){
+    #            moveCards(playerToAsk, targetPlayer, cardToAsk);
+    #            if (isFinished()){
+    #                endGame();
+    #            }
+    #            turn(targetPlayer);
+    #        } else {
+    #            if (goFish(targetPlayer, cardToAsk)){
+    #                if (isFinished()){
+    #                    endGame();
+    #                }
+    #                turn(targetPlayer);
+    #            } else {
+    #                return;
+    #            }
+    #        }
+    #    } else {
+    #        printf("Sorry, cannot choose yourself ya'\n");
+    #        turn(targetPlayer);
+    #    }
+    #}
 
     #Boris Marin
     turn: #targetPlayer s1, playerToAsk s4, cardToAsk s5
