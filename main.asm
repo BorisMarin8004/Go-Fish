@@ -330,6 +330,7 @@
             la $a0, onlyFish #printf("You can only fish, your hand is empty.\n");
             li $v0, 4
             syscall
+            j goFish
             j printOptionsEnd
 
             askQuestion:
@@ -396,11 +397,19 @@
             jal clearAllTemps
             move $v0,$s0 # moving deck to back to $s0
 
-            la $a0, seedAsk # to move to startGame - Ask for seed number
+        la $a0, pairAsk # Ask for pair number
             li $v0, 4
             syscall
+            
+            li $v0, 5 # user input pairAsk
+            syscall
+            
+            move $s0, $v0 #move pairLimit into save 
 
 
+            la $a0, seedAsk # Ask for seed number
+            li $v0, 4
+            syscall
 
             la $a3, deck #deck to arugment 3
             jal shuffleDeck
@@ -408,7 +417,7 @@
 
             move $a0, $v0
 
-            la $a0, playerAsk # to move to startGame - Ask for player number (2-4)
+            la $a0, playerAsk # Ask for player number (2-4)
             li $v0, 4
             syscall
 
@@ -525,7 +534,7 @@
             j for
         endFor:
 
-        beq $t0, 13, andFour #if(countTotalScores == 13)
+        bne $t0, 13, endFour #if(countTotalScores == 13)
         andFour:
         beq $t4, 4, thenFour #&& pairLimit == 4
         li $v0, 0 #return 0
