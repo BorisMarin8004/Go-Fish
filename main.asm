@@ -1,4 +1,9 @@
-#Insert Header Here
+# Go_Fish.asm
+# Anthony Herrera - CST 237 Spring 21
+# Keyoni McNair - CST 237 Spring 21
+# Boris Marin - CST 237 Spring 21
+# Jeffrey Dobbek - CST 237 Spring 21
+
 .data
     DECKSIZE: .word 52 #const int DECK_SIZE = 52;
     cardToAsk: .word 0
@@ -19,6 +24,8 @@
     endGameText: .asciiz "\nEND GAME!\n"
     goFishText: .asciiz "You are fishing(email) now. (Bad hacker stuff)\n"
     lineBreak: .asciiz "\n"
+    maxPairs2: .asciiz "\nHow many pair should be made until Game Over? (up to 26): "
+    maxPairs4: .asciiz "\nHow many pair should be made until Game Over? (up to 13): "
     onlyFish: .asciiz "You can only fish, your hand is empty.\n"
     pairAsk: .asciiz "Enter how many pair you want to play(put either 2 or 4):  "
     playAgainText: .asciiz "Would you like to play again?(1 for yes, 0 for no): \n"
@@ -334,6 +341,25 @@
         syscall
 
         move $s0, $v0 #move pairLimit into save
+        
+        beq $s0, 4, fourLimit
+        
+        la $a0, maxPairs2 # Ask for maxPairs 2
+        li $v0, 4
+        syscall
+        j inputMaxPairs
+        
+        fourLimit:
+        la $a0, maxPairs4 # Ask for maxPairs 4
+        li $v0, 4
+        syscall
+        
+       
+        inputMaxPairs:
+        li $v0, 5 # user input pairAsk
+        syscall
+        
+        move $s6, $v0 #move pairLimit into save
 
         la $a0, seedAsk # Ask for seed number
         li $v0, 4
@@ -457,7 +483,7 @@
             j for
         endFor:
 
-        bne $t0, 13, endFour #if(countTotalScores == 13)
+        bne $t0, $s6, endFour #if(countTotalScores == 13)
         andFour:
         beq $t4, 4, thenFour #&& pairLimit == 4
         li $v0, 0 #return 0
@@ -466,7 +492,7 @@
         li $v0, 1 #return 1
         j endIsFinished
         endFour:
-        beq $t0, 2, andTwo #if(countTotalScores == 26)     # CHANGE THIS TO 26
+        beq $t0, $s6, andTwo #if(countTotalScores == 26)     # CHANGE THIS TO 26
         li $v0, 0
         j endIsFinished
         andTwo:
@@ -528,18 +554,7 @@
             j forPrintScores
         endPrintScoresLoop:
     jr $ra
-    #int goFish (int player, int expCard) {
-    #    if (isEmpty()) {
-    #        printf("All fish is DEAD(deck is empty).\n");
-    #        return 0;
-    #    } else {
-    #        printf("You are fishing(email) now. (Bad hacker stuff)\n");
-    #        int card = draw(deck, deckTop);
-    #        hands[player][card]++;
-    #        printf("You got: %d\n", card);
-    #        return expCard == card;
-    #    }
-    #}
+    
     #Boris Marin
     goFish: #targetPlayer #cardToAsk
         addi $sp, $sp -4
@@ -551,7 +566,7 @@
 
         jal isEmpty
         bne $v0, 1, else1
-        if1: #deck empty??
+        if1: #deck empty
             la $a0, deckEmpty #print deck is empty
             jal printStr
             li $v0, 0
@@ -590,13 +605,6 @@
         addi $sp, $sp, 4
     jr $ra
 
-    #void moveCards(int srcPlayer, int targetPlayer, int card){
-    #   printf("You got the card you asked for, in your nasty hands!\n");
-    #   while(cardInHand(srcPlayer, card)) {
-    #       hands[srcPlayer][card]--;
-    #       hands[targetPlayer][card]++;
-    #   }
-    #}
     #Boris Marin
     moveCards: #srcPlayer, targetPlayer, card
         addi $sp, $sp -4
@@ -646,38 +654,6 @@
         lw $ra, 0($sp)
         addi $sp, $sp, 4
     jr $ra
-
-
-    #void turn(int targetPlayer){
-    #    updateScores(targetPlayer);
-    #    printOptions(targetPlayer);
-    #    int playerToAsk;
-    #    int cardToAsk;
-    #    scanf("%d", &playerToAsk);
-    #    scanf("%d", &cardToAsk);
-    #    playerToAsk--;
-    #    if (targetPlayer != playerToAsk){
-    #        if (cardInHand(playerToAsk, cardToAsk)){
-    #            moveCards(playerToAsk, targetPlayer, cardToAsk);
-    #            if (isFinished()){
-    #                endGame();
-    #            }
-    #            turn(targetPlayer);
-    #        } else {
-    #            if (goFish(targetPlayer, cardToAsk)){
-    #                if (isFinished()){
-    #                    endGame();
-    #                }
-    #                turn(targetPlayer);
-    #            } else {
-    #                return;
-    #            }
-    #        }
-    #    } else {
-    #        printf("Sorry, cannot choose yourself ya'\n");
-    #        turn(targetPlayer);
-    #    }
-    #}
 
     #Boris Marin
     turn: #targetPlayer s1, playerToAsk s4, cardToAsk s5
