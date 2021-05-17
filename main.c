@@ -109,6 +109,7 @@ void shuffleDeck(int shuffleNumber) {
 }
 
 
+
 //swaps two integers by address.
 void swap (int *a, int *b){
     int temp = *a;
